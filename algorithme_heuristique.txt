@@ -1,0 +1,19 @@
+Entrée:
+	Instance = {
+		int i_Nombre_Jour, i_Nombre_Shift, i_Nombre_Personne
+		vector<Shift> v_Shift
+		vector<Personne> v_Personne
+		vector<...> poids
+	}
+Préconditions: { attributs définis }
+Sortie:
+	Solution = {
+		vector<vector<int>> v_v_IdShift_Par_Personne_et_Jour
+		int i_valeur_fonction_objectif
+	}
+Postconditions:
+	{ toutes les contraintes sont respectées par la solution }
+
+
+Algorithme:
+
