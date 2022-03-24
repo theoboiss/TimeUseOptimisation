@@ -15,5 +15,45 @@ Postconditions:
 	{ toutes les contraintes sont respectées par la solution }
 
 
-Algorithme:
+Exemple de solution : {Lundi, Mardi, ...}
+						 |
+				{Pierre, Marie, ....}
+				    |	   |
+				    1	   3
 
+
+
+Algorithme:
+S <- [1..i_Nombre_Jour][1...i_Nombre_Personne] : Tableau d'Entier entre -1 et i_Nombre_Shift	// Déclaration de la solution
+
+Pour personne allant de 1 à i_Nombre_Personne:	// Initialisation du jour 1
+	shift <- -1
+	Si is_Available_Personne_Jour(personne, 1):
+		shift <- meilleur_Shift(1, personne)	// meilleur_Shift défini par rapport à v_v_Nbre_Personne_Requis_Jour_Shift, v_v_v_Poids_Affectation_Pers_Jour_Shift et v_v_v_Poids_Refus_Pers_Jour_Shift
+		S[1][personne] <- shift
+	FinSi
+FinPour
+
+
+Pour jour allant de 2 à i_Nombre_Jour : // On parcourt les jours à partir du 2e
+	Pour personne allant de 1 à i_Nombre_Personne : // On parcourt toutes les personnes du jour
+		shift <- -1 // Initialisation du shift pour une personne, pour un jour
+
+		Si is_Available_Personne_Jour(personne, jour):
+			// Choix d'un shift
+			is_chosen_shift <- Faux
+			Pour candidat allant de 1 à i_Nombre_Shift :
+				Si is_possible_Shift_Succede(S[jour-1][personne], v_Shift[candidat]) :
+					shift <- v_Shift[candidat]
+					is_chosen_shift <- Vrai
+				FinSi
+				Si is_chosen_shift :
+					Sortir
+			FinPour
+		FinSi
+
+		S[jour][personne] <- shift // Affectation du shift à une personne, pour un jour
+	FinPour
+FinPour
+
+Retourner S
