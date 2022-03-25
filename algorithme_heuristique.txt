@@ -1,18 +1,18 @@
-Entrée:
+EntrÃ©e:
 	Instance = {
 		int i_Nombre_Jour, i_Nombre_Shift, i_Nombre_Personne
 		vector<Shift> v_Shift
 		vector<Personne> v_Personne
 		vector<...> poids
 	}
-Préconditions: { attributs définis }
+PrÃ©conditions: { attributs dÃ©finis }
 Sortie:
 	Solution = {
 		vector<vector<int>> v_v_IdShift_Par_Personne_et_Jour
 		int i_valeur_fonction_objectif
 	}
 Postconditions:
-	{ toutes les contraintes sont respectées par la solution }
+	{ toutes les contraintes sont respectÃ©es par la solution }
 
 
 Exemple de solution : {Lundi, Mardi, ...}
@@ -20,39 +20,76 @@ Exemple de solution : {Lundi, Mardi, ...}
 				{Pierre, Marie, ....}
 				    |	   |
 				    1	   3
-
+				 Cpt = 1
 
 
 Algorithme:
-S <- [1..i_Nombre_Jour][1...i_Nombre_Personne] : Tableau d'Entier entre -1 et i_Nombre_Shift	// Déclaration de la solution
+S <- [1..i_Nombre_Jour][1...i_Nombre_Personne] : Tableau d'Entier entre -1 et i_Nombre_Shift	// DÃ©claration de la solution
 
-Pour personne allant de 1 à i_Nombre_Personne:	// Initialisation du jour 1
+v_Nbre_Shitf_Consecutif <- [1... i_Nombre_Personne]
+v_Nbre_Jour_OFF_Consecutif <- [1... i_Nombre_Personne]
+
+Pour personne allant de 1 Ã  i_Nombre_Personne:	// Initialisation du jour 1
 	shift <- -1
 	Si is_Available_Personne_Jour(personne, 1):
-		shift <- meilleur_Shift(1, personne)	// meilleur_Shift défini par rapport à v_v_Nbre_Personne_Requis_Jour_Shift, v_v_v_Poids_Affectation_Pers_Jour_Shift et v_v_v_Poids_Refus_Pers_Jour_Shift
+		shift <- meilleur_Shift(1, personne)	// meilleur_Shift dÃ©fini par rapport Ã  v_v_Nbre_Personne_Requis_Jour_Shift, v_v_v_Poids_Affectation_Pers_Jour_Shift et v_v_v_Poids_Refus_Pers_Jour_Shift
 		S[1][personne] <- shift
+		Si (shift != -1 ):
+			v_Nbre_Shift_Consecutif[personne] <- 1 //Initialisation du compteur des shifts consecutifs et des jours OFF consÃ©cutifs
+			v_Nbre_Jour_OFF_Consecutif[personne] <- 0
+		Sinon
+			v_Nbre_Shift_Consecutif[personne] <- 0
+			v_Nbre_Jour_OFF_Consecutif[personne] <-1
+		FinSi
 	FinSi
 FinPour
 
 
-Pour jour allant de 2 à i_Nombre_Jour : // On parcourt les jours à partir du 2e
-	Pour personne allant de 1 à i_Nombre_Personne : // On parcourt toutes les personnes du jour
+Pour jour allant de 2 Ã  i_Nombre_Jour : // On parcourt les jours Ã  partir du 2e
+	Pour personne allant de 1 Ã  i_Nombre_Personne : // On parcourt toutes les personnes du jour
 		shift <- -1 // Initialisation du shift pour une personne, pour un jour
 
-		Si is_Available_Personne_Jour(personne, jour):
-			// Choix d'un shift
-			is_chosen_shift <- Faux
-			Pour candidat allant de 1 à i_Nombre_Shift :
-				Si is_possible_Shift_Succede(S[jour-1][personne], v_Shift[candidat]) :
-					shift <- v_Shift[candidat]
-					is_chosen_shift <- Vrai
+		Si is_Available_Personne_Jour(personne, jour) :
+		
+			Si V_Nbre_Shift_Consecutif[personne] <  get_Personne_Nbre_Shift_Consecutif_Max(personne) :
+			
+				Si v_Nbre_Jour_OFF_Consecutif[personne] == 0 
+				   OU  v_Nbre_Jour_OFF_Consecutif[personne] >= get_Personne_Nbre_Jour_OFF_Consecutif_Min(personne) :
+				   
+				   //v_Nbre_Jour_OFF_Consecutif[personne] == 0 :situation dans laquelle la personne travaille depuis au moins le jour d'avant
+				   // 0 < v_Nbre_Jour_OFF_Consecutif[personne] < get_Personne_Nbre_Jour_OFF_Consecutif_Min(personne)  : situation dans laquelle la 					personne accumule ses repos consÃ©cutifs
+				   // v_Nbre_Jour_OFF_Consecutif[personne] >= get_Personne_Nbre_Jour_OFF_Consecutif_Min(personne) : situation dans laquelle la 				     	     personne peut reprendre son travail
+				
+				
+				
+					// Choix d'un shift
+					is_chosen_shift <- Faux
+					Pour candidat allant de 1 Ã  i_Nombre_Shift : //les id shift correspondent Ã  candidat
+						Si is_possible_Shift_Succede(S[jour-1][personne], candidat) :
+							shift <- candidat
+							is_chosen_shift <- Vrai
+						FinSi
+						Si is_chosen_shift :
+							Sortir
+						FinSi
+						
+					FinPour
+					
 				FinSi
-				Si is_chosen_shift :
-					Sortir
-			FinPour
+				
+			FinSi
+			
 		FinSi
+		
 
-		S[jour][personne] <- shift // Affectation du shift à une personne, pour un jour
+		S[jour][personne] <- shift // Affectation du shift Ã  une personne, pour un jour
+		Si (shift != -1)
+			v_Nbre_Shift_Consecutif[personne] += 1
+			v_Nbre_Jour_OFF_Consecutif[personne] <- 0
+		Sinon
+			v_Nbre_Shift_Consecutif[personne] <- 0
+			v_Nbre_Jour_OFF_Consecutif[personne] += 1
+		FinSi
 	FinPour
 FinPour
 
