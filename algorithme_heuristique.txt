@@ -24,25 +24,44 @@ Exemple de solution : {Lundi, Mardi, ...}
 
 
 Algorithme:
-S <- [1..i_Nombre_Jour][1...i_Nombre_Personne] : Tableau d'Entier entre -1 et i_Nombre_Shift	// Déclaration de la solution
+S <- [1..i_Nombre_Jour][1..i_Nombre_Personne] : Tableau d'Entier entre -1 et i_Nombre_Shift	// Déclaration de la solution
 
-v_Nbre_Shitf_Consecutif <- [1..i_Nombre_Personne]
+v_Nbre_Shift_Consecutif <- [1..i_Nombre_Personne]
 v_Nbre_Jour_OFF_Consecutif <- [1..i_Nombre_Personne]
 v_Nbre_WE_Travaille <- [1..i_Nombre_Personne]
+v_v_Nbre_Chaque_Shift_Pers <- [1..i_Nombre_Personne][1..i_Nombre_Shift]
 
-Pour personne allant de 1 à i_Nombre_Personne:	// Initialisation du jour 1
+Pour personne allant de 1 à i_Nombre_Personne :	// Initialisation du jour 1
 	v_Nbre_WE_Travaille[personne] <- 0
 	shift <- -1
 	Si is_Available_Personne_Jour(personne, 1):
-		shift <- meilleur_Shift(1, personne)	// meilleur_Shift défini par rapport à v_v_Nbre_Personne_Requis_Jour_Shift, v_v_v_Poids_Affectation_Pers_Jour_Shift et v_v_v_Poids_Refus_Pers_Jour_Shift
+
+		meilleur_candidat <- -1
+		score <- MAX_INT
+		Pour candidat allant de 1 à i_Nombre_Shift :
+			Si get_Personne_Shift_Nbre_Max(personne, candidat) > 0 : // La personne peut travailler sur ce shift
+				score_candidat <- evaluer(candidat) // évalue par rapport à v_v_Nbre_Personne_Requis_Jour_Shift, v_v_v_Poids_Affectation_Pers_Jour_Shift et v_v_v_Poids_Refus_Pers_Jour_Shift
+				Si (score_candidat < score) :
+					meilleur_candidat <- candidat
+					score <- score_candidat
+				FinSi
+			FinSi
+		FinPour
+		shift <- meilleur_candidat
 		S[1][personne] <- shift
+
+		Pour tout_shift allant de 1 à i_Nombre_Shift :
+			v_v_Nbre_Chaque_Shift_Pers[personne][tout_shift] <- 0
+		FinPour
 		Si (shift != -1 ):
 			v_Nbre_Shift_Consecutif[personne] <- 1 //Initialisation du compteur des shifts consecutifs et des jours OFF consécutifs
 			v_Nbre_Jour_OFF_Consecutif[personne] <- 0
+			v_v_Nbre_Chaque_Shift_Pers[personne][shift] <- 1
 		Sinon
 			v_Nbre_Shift_Consecutif[personne] <- 0
 			v_Nbre_Jour_OFF_Consecutif[personne] <-1
 		FinSi
+
 	FinSi
 FinPour
 
@@ -57,7 +76,7 @@ Pour jour allant de 2 à i_Nombre_Jour : // On parcourt les jours à partir du 2
 
 			Si is_Available_Personne_Jour(personne, jour) :
 		
-				Si V_Nbre_Shift_Consecutif[personne] <  get_Personne_Nbre_Shift_Consecutif_Max(personne) :
+				Si V_Nbre_Shift_Consecutif[personne] < get_Personne_Nbre_Shift_Consecutif_Max(personne) :
 			
 					Si v_Nbre_Jour_OFF_Consecutif[personne] == 0 
 					   OU  v_Nbre_Jour_OFF_Consecutif[personne] >= get_Personne_Nbre_Jour_OFF_Consecutif_Min(personne) :
