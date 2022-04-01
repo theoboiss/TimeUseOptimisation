@@ -22,6 +22,33 @@ Exemple de solution : {Lundi, Mardi, ...}
 				    1	   3
 				 Cpt = 1
 
+get_Shift_Duree(int i_Id_Shift)
+get_Personne_Duree_total_Max(int i_Id_Personne)
+
+---------------------------------------------------------------------------------------------------------
+Fonctions :
+
+Bool is_Peut_Reprendre_Travaille(personne, jour, Nbre_WE_Travaille_Personne):
+												 v_Nbre_WE_Travaille[personne]
+
+	Pour i allant de jour à jour + get_Personne_Nbre_Shift_Consecutif_Min(personne) : //On vérfiie que la personne est disponible sur la nombre de jour minimum consécutif suivant (contraintre shift consécutif minimum)
+
+		Si ( !is_Available_Personne_Jour(personne, i) ) v ( ( (Nbre_WE_Travaille_Personne >= get_Personne_Nbre_WE_Max(personne) ) ^ ( i % 7 >= 5 ) ) ): 
+			 // Vrai si jour est un jour de congé				//Vrai si le quota de WE travaillé est dépassé							//Vrai en WE
+	
+			return False
+		
+		Fin Si
+
+	FinPour
+
+	Return True
+
+
+
+
+---------------------------------------------------------------------------------------------------------
+
 
 Algorithme:
 S <- [1..i_Nombre_Jour][1..i_Nombre_Personne] : Tableau d'Entier entre -1 et i_Nombre_Shift	// Déclaration de la solution
@@ -30,20 +57,21 @@ v_Nbre_Shift_Consecutif <- [1..i_Nombre_Personne]
 v_Nbre_Jour_OFF_Consecutif <- [1..i_Nombre_Personne]
 v_Nbre_WE_Travaille <- [1..i_Nombre_Personne]
 v_v_Nbre_Chaque_Shift_Pers <- [1..i_Nombre_Personne][1..i_Nombre_Shift]
+v_Duree_Totale_Shift_Personne <- [1..i_Nombre_Personne]
 
 Pour personne allant de 1 à i_Nombre_Personne :	// Initialisation du jour 1
 	v_Nbre_WE_Travaille[personne] <- 0
 	shift <- -1
-	Si is_Available_Personne_Jour(personne, 1):
+	
+	Si ( ( is_Available_Personne_Jour(personne, 1) ) ^ ( is_Peut_Reprendre_Travaille(personne, jour, 0) ) ):
 
 		meilleur_candidat <- -1
-		score <- MAX_INT
+		plus_long__Duree_ Shift <- 0
 		Pour candidat allant de 1 à i_Nombre_Shift :
 			Si get_Personne_Shift_Nbre_Max(personne, candidat) > 0 : // La personne peut travailler sur ce shift
-				score_candidat <- evaluer(candidat) // évalue par rapport à v_v_Nbre_Personne_Requis_Jour_Shift, v_v_v_Poids_Affectation_Pers_Jour_Shift et v_v_v_Poids_Refus_Pers_Jour_Shift
-				Si (score_candidat < score) :
+				Si (get_Shift_Duree(candidat) > plus_long__Duree_ Shift) :  ///A REVOIR
 					meilleur_candidat <- candidat
-					score <- score_candidat
+					plus_long__Duree_ Shift <- score_candidat
 				FinSi
 			FinSi
 		FinPour
@@ -56,10 +84,12 @@ Pour personne allant de 1 à i_Nombre_Personne :	// Initialisation du jour 1
 		Si (shift != -1 ):
 			v_Nbre_Shift_Consecutif[personne] <- 1 //Initialisation du compteur des shifts consecutifs et des jours OFF consécutifs
 			v_Nbre_Jour_OFF_Consecutif[personne] <- 0
-			v_v_Nbre_Chaque_Shift_Pers[personne][shift] <- 1
+			v_v_Nbre_Chaque_Shift_Pers[personne][shift] <- 1	
+			v_Duree_Totale_Shift_Personne[personne] <- get_Shift_Duree(shift);
 		Sinon
 			v_Nbre_Shift_Consecutif[personne] <- 0
-			v_Nbre_Jour_OFF_Consecutif[personne] <-1
+			v_Nbre_Jour_OFF_Consecutif[personne] <-1	
+			v_Duree_Totale_Shift_Personne[personne] <-0
 		FinSi
 
 	FinSi
@@ -69,41 +99,53 @@ FinPour
 Pour jour allant de 2 à i_Nombre_Jour : // On parcourt les jours à partir du 2e
 	Pour personne allant de 1 à i_Nombre_Personne : // On parcourt toutes les personnes du jour
 		shift <- -1 // Initialisation du shift pour une personne, pour un jour
-
-		Si  ( ( v_Nbre_WE_Travaille[personne] < get_Personne_Nbre_WE_Max(personne) )^( jour % 7 >= 5 ) ) // Si on est le WK et il reste des WK à travailler
-			 v
-			( jour % 7 < 5 ) : // Ou si on est en semaine
-
-			Si is_Available_Personne_Jour(personne, jour) :
 		
-				Si V_Nbre_Shift_Consecutif[personne] < get_Personne_Nbre_Shift_Consecutif_Max(personne) :
+		Si v_Duree_Totale_Shift_Personne[personne] < get_Personne_Duree_totale_Max(personne):
+		
+			Si  ( ( v_Nbre_WE_Travaille[personne] < get_Personne_Nbre_WE_Max(personne) )^( jour % 7 >= 5 ) ) // Si on est le WK et il reste des WK à travailler
+				 v
+				( jour % 7 < 5 ) : // Ou si on est en semaine
+
 			
-					Si v_Nbre_Jour_OFF_Consecutif[personne] == 0 
-					   OU  v_Nbre_Jour_OFF_Consecutif[personne] >= get_Personne_Nbre_Jour_OFF_Consecutif_Min(personne) :
+				Si ( V_Nbre_Shift_Consecutif[personne] < get_Personne_Nbre_Shift_Consecutif_Max(personne) ) :
+			
+					Si is_Available_Personne_Jour(personne, jour) :
+			
+						Si ( v_Nbre_Jour_OFF_Consecutif[personne] == 0 )
+						    v
+						    ( 
+							 ( v_Nbre_Jour_OFF_Consecutif[personne] >= get_Personne_Nbre_Jour_OFF_Consecutif_Min(personne) )
+								^
+							 ( is_Peut_Reprendre_Travaille(personne, jour, v_Nbre_WE_Travaille[personne]) )
+							)
 				   
-					   //v_Nbre_Jour_OFF_Consecutif[personne] == 0 :situation dans laquelle la personne travaille depuis au moins le jour d'avant
-					   // 0 < v_Nbre_Jour_OFF_Consecutif[personne] < get_Personne_Nbre_Jour_OFF_Consecutif_Min(personne)  : situation dans laquelle la 					personne accumule ses repos consécutifs
-					   // v_Nbre_Jour_OFF_Consecutif[personne] >= get_Personne_Nbre_Jour_OFF_Consecutif_Min(personne) : situation dans laquelle la 				     	     personne peut reprendre son travail
-				
-				
-				
-						// Choix d'un shift
-						is_chosen_shift <- Faux
-						Pour candidat allant de 1 à i_Nombre_Shift : //les id shift correspondent à candidat
-							Si is_possible_Shift_Succede(S[jour-1][personne], candidat) :
-								shift <- candidat
-								is_chosen_shift <- Vrai
-							FinSi
-							Si is_chosen_shift :
-								Sortir
-							FinSi
+						//v_Nbre_Jour_OFF_Consecutif[personne] == 0 :situation dans laquelle la personne travaille depuis au moins le jour d'avant
+						// 0 < v_Nbre_Jour_OFF_Consecutif[personne] < get_Personne_Nbre_Jour_OFF_Consecutif_Min(personne)  : situation dans laquelle la personne accumule ses repos consécutifs
+						// v_Nbre_Jour_OFF_Consecutif[personne] >= get_Personne_Nbre_Jour_OFF_Consecutif_Min(personne) : situation dans laquelle la personne peut reprendre son travail
+			       		// is_Peut_Reprendre_Travaille(personne, jour, v_Nbre_WE_Travaille[personne]) : on vérifie que la personne pourra travailler au moins le nombre consécutif minimum de quart d'heure de travail.
+
+							
+							// Choix d'un shift
+							is_chosen_shift <- Faux
+							Pour candidat allant de 1 à i_Nombre_Shift : //les id shift correspondent à candidat
+								Si is_possible_Shift_Succede(S[jour-1][personne], candidat) :
+									Si v_v_Nbre_Chaque_Shift_Pers[personne][candidat] <  get_Personne_Shift_Nbre_Max(personne, candidat);
+										shift <- candidat
+										is_chosen_shift <- Vrai
+									FinSi
+								FinSi
+								Si is_chosen_shift :
+									Sortir
+								FinSi
 						
-						FinPour
+							FinPour
 					
+						FinSi
+				
 					FinSi
 				
 				FinSi
-			
+
 			FinSi
 
 		FinSi
@@ -113,6 +155,8 @@ Pour jour allant de 2 à i_Nombre_Jour : // On parcourt les jours à partir du 2
 		Si (shift != -1) :	// Si on travaille ce jour là
 			v_Nbre_Shift_Consecutif[personne] += 1
 			v_Nbre_Jour_OFF_Consecutif[personne] <- 0
+			v_v_Nbre_Chaque_Shift_Pers[personne][shift] += 1;
+			v_Duree_Totale_Shift_Personne[personne] += get_Shift_Duree(shift)
 			Si ( jour % 7 == 6 ) :	// Que ce jour là est dimanche (équivalent à : on a travaillé que le dimanche ou tout le WK)
 				v_Nbre_WE_Travaille[personne] += 1
 			FinSi
