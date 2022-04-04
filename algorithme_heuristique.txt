@@ -63,7 +63,7 @@ Pour personne allant de 1 à i_Nombre_Personne :	// Initialisation du jour 1
 	v_Nbre_WE_Travaille[personne] <- 0
 	shift <- -1
 	
-	Si ( ( is_Available_Personne_Jour(personne, 1) ) ^ ( is_Peut_Reprendre_Travaille(personne, jour, 0) ) ):
+	Si ( ( is_Available_Personne_Jour(personne, 1) ) ^ ( is_Peut_Reprendre_Travaille(personne, 0, 0) ) ):
 
 		meilleur_candidat <- -1
 		plus_long__Duree_ Shift <- 0
