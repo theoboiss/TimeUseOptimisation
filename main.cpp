@@ -1,5 +1,5 @@
 //#define CHEMIN_DOSSIER_DONNEES "/Users/kergosien/Desktop/Cours Optim Discret/Conception emploi du temps/Format Etudiant Public/"
-#define CHEMIN_DOSSIER_DONNEES "/Users/boiss/source/repos/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/"
+#define CHEMIN_DOSSIER_DONNEES "/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/"
 #define NOM_FICHIER_LISTE_FICHIER_DONNEES "data.txt"
 #define NOM_FICHIER_LISTE_SORTIE "sortie.txt"
 
@@ -158,12 +158,15 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
 
     //------Cas du premier jour------
     S->v_v_IdShift_Par_Personne_et_Jour = vector<vector<int>>(instance->get_Nombre_Personne());
+    S->v_v_IdShift_Par_Personne_et_Jour[0] = vector<int>(instance->get_Nombre_Personne());
     for (int personne = 0; personne < instance->get_Nombre_Personne(); personne++)
     {
-        S->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(instance->get_Nombre_Jour());
+        cout << "Boucle personne : " << personne << endl;
+
+        v_v_Nbre_Chaque_Shift_Pers[personne] = vector<int>(instance->get_Nombre_Shift(), 0);
         int shift = -1;
 
-        if ((instance->is_Available_Personne_Jour(personne, 1)) && (is_Peut_Reprendre_Travaille(instance, personne, 0, 0)))
+        if ((instance->is_Available_Personne_Jour(personne, 0)) && (is_Peut_Reprendre_Travaille(instance, personne, 0, 0)))
         {
             int meilleur_candidat = -1;
             int plus_long_Duree_Shift = 0;
@@ -180,30 +183,27 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
                 }
             }
             shift = meilleur_candidat;
-            S->v_v_IdShift_Par_Personne_et_Jour.at(0).at(personne) = shift; // A VERIFIER
+        }
 
-            for (int tout_shift = 0; tout_shift < instance->get_Nombre_Shift(); tout_shift++)
-            {
-                v_v_Nbre_Chaque_Shift_Pers.at(personne).at(tout_shift) = 0;
-            }
-            if (shift == -1)
-            {
-                v_Nbre_Shift_Consecutif.at(personne) = 1; //Initialisation du compteur des shifts consecutifs et des jours OFF consécutifs
-                v_Nbre_Jour_OFF_Consecutif.at(personne) = 0;
-                v_Duree_Totale_Shift_Personne.at(personne) = instance->get_Shift_Duree(shift);
-                v_v_Nbre_Chaque_Shift_Pers.at(personne).at(shift) = 1;
-            }
-            else
-            {
-                v_Nbre_Shift_Consecutif.at(personne) = 1; //Initialisation du compteur des shifts consecutifs et des jours OFF consécutifs
-                v_Nbre_Jour_OFF_Consecutif.at(personne) = 0;
-                v_Duree_Totale_Shift_Personne.at(personne) = 0;
-            }
+        S->v_v_IdShift_Par_Personne_et_Jour.at(0).at(personne) = shift;
+
+        if (shift != -1)
+        {
+            v_Nbre_Shift_Consecutif.at(personne) = 1; //Initialisation du compteur des shifts consecutifs et des jours OFF consécutifs
+            v_Nbre_Jour_OFF_Consecutif.at(personne) = 0;
+            v_Duree_Totale_Shift_Personne.at(personne) = instance->get_Shift_Duree(shift);
+            v_v_Nbre_Chaque_Shift_Pers.at(personne).at(shift) += 1;
+        }
+        else
+        {
+            v_Nbre_Shift_Consecutif.at(personne) = 0; //Initialisation du compteur des shifts consecutifs et des jours OFF consécutifs
+            v_Nbre_Jour_OFF_Consecutif.at(personne) = 1;
+            v_Duree_Totale_Shift_Personne.at(personne) = 0;
         }
     }
 
 
-    //------Cas générale------
+    //------Cas général------
 
     for (int jour = 1; jour < instance->get_Nombre_Jour(); jour++) //On parcourt les jours à partir du deuxième
     {
