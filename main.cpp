@@ -157,10 +157,11 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
     vector<vector<int>> v_v_Nbre_Chaque_Shift_Pers(instance->get_Nombre_Personne());
 
     //------Cas du premier jour------
-    S->v_v_IdShift_Par_Personne_et_Jour = vector<vector<int>>(instance->get_Nombre_Jour());
-    S->v_v_IdShift_Par_Personne_et_Jour[0] = vector<int>(instance->get_Nombre_Personne());
+    S->v_v_IdShift_Par_Personne_et_Jour = vector<vector<int>>(instance->get_Nombre_Personne());
     for (int personne = 0; personne < instance->get_Nombre_Personne(); personne++)
     {
+        cout << "Boucle personne : " << personne << endl;
+        S->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(instance->get_Nombre_Jour(), -1);
         v_v_Nbre_Chaque_Shift_Pers[personne] = vector<int>(instance->get_Nombre_Shift(), 0);
         int shift = -1;
 
@@ -183,7 +184,7 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
             shift = meilleur_candidat;
         }
 
-        S->v_v_IdShift_Par_Personne_et_Jour.at(0).at(personne) = shift;
+        S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(0) = shift;
 
         if (shift != -1)
         {
@@ -203,16 +204,10 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
 
     //------Cas général------
 
-    for (int jour = 1; jour < instance->get_Nombre_Jour(); jour++) //On parcourt les jours à partir du deuxième
+    for (int personne = 0; personne < instance->get_Nombre_Personne(); personne++)
     {
-        cout << endl << "Boucle jour : " << jour;
-
-        S->v_v_IdShift_Par_Personne_et_Jour[jour] = vector<int>(instance->get_Nombre_Personne());
-
-        for (int personne = 0; personne < instance->get_Nombre_Personne(); personne++)
+        for (int jour = 1; jour < instance->get_Nombre_Jour(); jour++) //On parcourt les jours à partir du deuxième
         {
-            cout << "\t" << personne;
-            v_v_Nbre_Chaque_Shift_Pers[personne] = vector<int>(instance->get_Nombre_Shift(), 0);
             int shift = -1; //Initialisation du shift pour une personne et pour un jour
             
             if (v_Duree_Totale_Shift_Personne.at(personne) < instance->get_Personne_Duree_total_Max(personne))
@@ -234,7 +229,7 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
                                 bool is_chosen_shift = false;
                                 for (int candidat = 0; (candidat < instance->get_Nombre_Shift()) && (!is_chosen_shift); candidat++) //les id shift correspondent à candidat
                                 {
-                                    if (S->v_v_IdShift_Par_Personne_et_Jour.at(jour - 1).at(personne) == -1) // Si le jour précédent était un jour repos
+                                    if (S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour-1) == -1) // Si le jour précédent était un jour repos
                                     {
                                         if (v_v_Nbre_Chaque_Shift_Pers.at(personne).at(candidat) < instance->get_Personne_Shift_Nbre_Max(personne, candidat))
                                         {
@@ -242,7 +237,7 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
                                             is_chosen_shift = true;
                                         }
                                     }
-                                    else if ( instance->is_possible_Shift_Succede(S->v_v_IdShift_Par_Personne_et_Jour.at(jour-1).at(personne), candidat) ) // Sinon, on vérifie que le candidat peut succéder au jour de travail précédent
+                                    else if ( instance->is_possible_Shift_Succede(S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour-1), candidat) ) // Sinon, on vérifie que le candidat peut succéder au jour de travail précédent
                                     {
                                         if (v_v_Nbre_Chaque_Shift_Pers.at(personne).at(candidat) < instance->get_Personne_Shift_Nbre_Max(personne, candidat))
                                         {
@@ -257,7 +252,7 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
                 }
             }
 
-            S->v_v_IdShift_Par_Personne_et_Jour.at(jour).at(personne) = shift; // A VERIFIER
+            S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour) = shift; // A VERIFIER
             if (shift != -1)
             {
                 v_Nbre_Shift_Consecutif.at(personne) += 1;
@@ -273,7 +268,7 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
             {
                 v_Nbre_Shift_Consecutif.at(personne) = 0;
                 v_Nbre_Jour_OFF_Consecutif.at(personne) += 1;
-                if ( (jour % 7 == 6) && ((S->v_v_IdShift_Par_Personne_et_Jour.at(jour-1).at(personne) != -1)) )	// Que ce jour là est dimanche (équivalent à : on a travaillé que le dimanche ou tout le WK)
+                if ( (jour % 7 == 6) && ((S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour-1) != -1)) )	// Que ce jour là est dimanche (équivalent à : on a travaillé que le dimanche ou tout le WK)
                 {
                     v_Nbre_WE_Travaille.at(personne) += 1;
                 }
