@@ -44,9 +44,35 @@ Bool is_Peut_Reprendre_Travaille(personne, jour, Nbre_WE_Travaille_Personne):
 
 	Return True
 
-
-
-
+meilleur_combinaison_shift-consecutif_duree_minimum(tableau_Id-Shift_trié, personne):
+	int combinaison_shift [nb_shift_consecutif_min]
+	bool iniisalise = false
+	int shift =0
+	Tant que (! initialise)
+		si get_Personne_Shift_Nbre_Max(personne,shift) > 0
+			comobinaison_shift[0]= shift
+			initilise = true
+		fin Si
+		shift++
+	fin Tant QUe
+	int dureeTotal =0
+	for (i = 1; i <nb_shift_consecutif_min; i++)
+		bool is_chosen = false
+		shift = 0
+		tant que ( !is_chosen && shift < instance->get_Nombre_Shift())
+			si get_Personne_Shift_Nbre_Max(personne,shift) > 0 &&  is_possible_Shift_Succede(combinaison_shift[i-1],shift)
+				combinsaison_shift[i] = shift
+				is_chosen = true
+			FinSi
+			shift++
+		fin Tantque
+		si(shift >= instance->get_nombre_Shift())
+			break pour
+			Afficher("Erreur combinaison minimum impossible")
+		fin si
+		dureeeTotale += instance->get_Shift_Duree(combinaison_shift[i])
+	fin pour  
+	return dureeTotale
 ---------------------------------------------------------------------------------------------------------
 
 

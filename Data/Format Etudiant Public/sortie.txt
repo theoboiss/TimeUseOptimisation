@@ -71,3 +71,50 @@
  Fichier données	 Tps de résolution 	 Best solution
  Fichier données	 Tps de résolution 	 Best solution
 /Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	116.794	0
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	0.0289159	0
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	0.0463258	0
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	0.0402022	0
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	0.347955	0
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	0.0442787	0
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	0.0718713	0
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	553.808	0
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	0.0157424	0
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	154.57	0
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	0.0187001	0
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	0.0412486	0
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	0.0168224	0
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	0.0143905	0
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+/Users/boiss/workspaces/VisualStudio2019/DI4_OptiEmploiDuTemps/DI4_OptiEmploiDuTemps/Data/Format Etudiant Public/Inst8.txt	521.223	0
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
+ Fichier données	 Tps de résolution 	 Best solution
