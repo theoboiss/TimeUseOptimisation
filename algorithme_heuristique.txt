@@ -33,7 +33,11 @@ Bool is_Peut_Reprendre_Travaille(personne, jour, Nbre_WE_Travaille_Personne):
 
 	Pour i allant de jour à jour + get_Personne_Nbre_Shift_Consecutif_Min(personne) : //On vérfiie que la personne est disponible sur la nombre de jour minimum consécutif suivant (contraintre shift consécutif minimum)
 
-		Si ( !is_Available_Personne_Jour(personne, i) ) v ( ( (Nbre_WE_Travaille_Personne >= get_Personne_Nbre_WE_Max(personne) ) ^ ( i % 7 >= 5 ) ) ): 
+		Si ( !is_Available_Personne_Jour(personne, i) ) v ( ( (Nbre_WE_Travaille_Personne >= get_Personne_Nbre_WE_Max(personne) ) ^ ( i 
+		
+		
+		
+		= 5 ) ) ): 
 			 // Vrai si jour est un jour de congé				//Vrai si le quota de WE travaillé est dépassé							//Vrai en WE
 	
 			return False
@@ -128,7 +132,10 @@ Pour jour allant de 2 à i_Nombre_Jour : // On parcourt les jours à partir du 2
 		
 		Si v_Duree_Totale_Shift_Personne[personne] < get_Personne_Duree_totale_Max(personne):
 		
-			Si  ( ( v_Nbre_WE_Travaille[personne] < get_Personne_Nbre_WE_Max(personne) )^( jour % 7 >= 5 ) ) // Si on est le WK et il reste des WK à travailler
+			Si  ( ( v_Nbre_WE_Travaille[personne] < get_Personne_Nbre_WE_Max(personne) )^( jour 
+			
+			
+			= 5 ) ) // Si on est le WK et il reste des WK à travailler
 				 v
 				( jour % 7 < 5 ) : // Ou si on est en semaine
 
