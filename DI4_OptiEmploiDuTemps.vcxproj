@@ -145,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="algorithme_heuristique.txt" />
+    <Text Include="Data\Format Etudiant Public\data.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Instance.cpp" />

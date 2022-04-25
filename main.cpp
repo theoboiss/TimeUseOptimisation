@@ -19,15 +19,15 @@ bool Comparer(pair<int, int>& a, pair<int, int>& b);
 
 int Resolution(Instance* instance);
 
-bool is_Peut_Travailler_WE_Semaine(list<int> l_Jour_OFF_Proche_WE_Personne, int nbre_WE_Travaille_Personne, int nbre_WE_Max_Personne, int semaine);
+bool is_Peut_Travailler_WE_Semaine(list<int>& l_Jour_OFF_Proche_WE_Personne, int nbre_WE_Travaille_Personne, int nbre_WE_Max_Personne, int semaine);
 
 bool is_Jour_OFF_Proche_WE(Instance* instance, int jour, int i_Nbre_Jour_OFF_Consecutif_Min, int i_Nbre_Shift_Consecutif_Min);
 
 Solution * GenerationSolutionRealisable(Instance * instance);
 
-bool is_Peut_Reprendre_Travaille(Instance* instance, int personne, int jour, int Nbre_WE_Travaille_Personne, int duree_totale_shift_personne, int duree_Min_Shift_Consecutif_Personne);
+bool is_Peut_Reprendre_Travail(Instance* instance, list<int>& l_Jour_OFF_Proche_WE_Personne, int personne, int jour, int Nbre_WE_Travaille_Personne, int duree_totale_shift_personne, int duree_Min_Shift_Consecutif_Personne);
 
-int Duree_Minimum_Combinaison_Shift_Possible(Instance* instance, int personne, vector<pair<int, int>> v_v_Shift_trie);
+int Duree_Minimum_Combinaison_Shift_Possible(Instance* instance, int personne);
 
 
 int main(int argc, const char* argv[])
@@ -225,7 +225,7 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
 
     vector<pair<int, int>> v_v_Shift_trie;
 
-    int duree_shift_min = instance->get_Shift_Duree(1);
+    int duree_shift_min = instance->get_Shift_Duree(0);
     for (int shift = 0; shift < instance->get_Nombre_Shift(); shift++)
     {
         int duree_shift = instance->get_Shift_Duree(shift);
@@ -246,10 +246,10 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
     {
         S->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(instance->get_Nombre_Jour(), -1);
         v_v_Nbre_Chaque_Shift_Pers[personne] = vector<int>(instance->get_Nombre_Shift(), 0);
-        v_Duree_Min_Shift_Consecutif_Personne.at(personne) = Duree_Minimum_Combinaison_Shift_Possible(instance, personne, v_v_Shift_trie);
+        v_Duree_Min_Shift_Consecutif_Personne.at(personne) = Duree_Minimum_Combinaison_Shift_Possible(instance, personne);
         int shift = -1;
 
-        if ( instance->is_Available_Personne_Jour(personne, 0) && is_Peut_Reprendre_Travaille(instance, personne, 0, 0, v_Duree_Totale_Shift_Personne.at(0), v_Duree_Min_Shift_Consecutif_Personne.at(personne)) )
+        if ( instance->is_Available_Personne_Jour(personne, 0) && is_Peut_Reprendre_Travail(instance, v_l_Jour_OFF_Proche_WE.at(personne), personne, 0, 0, v_Duree_Totale_Shift_Personne.at(0), v_Duree_Min_Shift_Consecutif_Personne.at(personne)) )
         {
             int meilleur_candidat = -1;
             int plus_long_Duree_Shift = 0;
@@ -310,7 +310,7 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
                         {
                             if (    ( v_Nbre_Jour_OFF_Consecutif.at(personne) == 0 ) // Si la personne travaille depuis au moins le jour d'avant
                                  || (    v_Nbre_Jour_OFF_Consecutif.at(personne) >= instance->get_Personne_Jour_OFF_Consecutif_Min(personne) // Si la personne a eu assez de repos et peut reprendre son travail
-                                      && is_Peut_Reprendre_Travaille(instance, personne, jour, v_Nbre_WE_Travaille.at(personne), v_Duree_Totale_Shift_Personne.at(personne), v_Duree_Min_Shift_Consecutif_Personne.at(personne)) ) ) // Et que la personne pourra travailler au moins le nombre consécutif minimum de quart d'heure de travail.
+                                      && is_Peut_Reprendre_Travail(instance, v_l_Jour_OFF_Proche_WE.at(personne), personne, jour, v_Nbre_WE_Travaille.at(personne), v_Duree_Totale_Shift_Personne.at(personne), v_Duree_Min_Shift_Consecutif_Personne.at(personne)) ) ) // Et que la personne pourra travailler au moins le nombre consécutif minimum de quart d'heure de travail.
                             {
                                 // Choix d'un shift
                                 bool is_chosen_shift = false;
@@ -376,7 +376,7 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
 }
 
 
-bool is_Peut_Travailler_WE_Semaine(list<int> l_Jour_OFF_Proche_WE_Personne, int nbre_WE_Travaille_Personne, int nbre_WE_Max_Personne, int semaine)
+bool is_Peut_Travailler_WE_Semaine(list<int>& l_Jour_OFF_Proche_WE_Personne, int nbre_WE_Travaille_Personne, int nbre_WE_Max_Personne, int semaine)
 {
     return (    (nbre_WE_Travaille_Personne + l_Jour_OFF_Proche_WE_Personne.size() < nbre_WE_Max_Personne) // S'il reste encore des WE sur lesquels on peut travailler
              || (    (nbre_WE_Travaille_Personne + l_Jour_OFF_Proche_WE_Personne.size() == nbre_WE_Max_Personne) // Ou s'il ne reste que des WE réservés
@@ -384,14 +384,15 @@ bool is_Peut_Travailler_WE_Semaine(list<int> l_Jour_OFF_Proche_WE_Personne, int 
 }
 
 
-bool is_Peut_Reprendre_Travaille(Instance * instance, int personne, int jour, int Nbre_WE_Travaille_Personne, int duree_totale_shift_personne, int duree_Min_Shift_Consecutif_Personne)
+bool is_Peut_Reprendre_Travail(Instance* instance, list<int>& l_Jour_OFF_Proche_WE_Personne, int personne, int jour, int Nbre_WE_Travaille_Personne, int duree_totale_shift_personne, int duree_Min_Shift_Consecutif_Personne)
 {
     // Pour chaque jour suivants sur lesquels la personne devra travailler ensuite
     for (int i = jour; (i < jour + instance->get_Personne_Nbre_Shift_Consecutif_Min(personne)) && (i < instance->get_Nombre_Jour()); i++)  //On vérifie que la personne est disponible sur le nombre de jours consécutifs suivants minimum
     {
         if (    (!instance->is_Available_Personne_Jour(personne, i)) // Si la personnne est en congé ce jour là
-             || (    Nbre_WE_Travaille_Personne >= instance->get_Personne_Nbre_WE_Max(personne) // Ou qu'elle s'apprête à travailler trop de weekends =================================================> is_Peut_Travailler_WE_Semaine peut-il s'y appliquer ?
-                  && i % 7 >= 5 ) // Et que c'est le weekend
+             || (    (i % 7 >= 5) // Ou que c'est le weekend
+                  && (!is_Peut_Travailler_WE_Semaine(l_Jour_OFF_Proche_WE_Personne, Nbre_WE_Travaille_Personne, instance->get_Personne_Nbre_WE_Max(personne), i/7)) ) // Et qu'elle s'apprête à travailler trop de weekends
+                    //Nbre_WE_Travaille_Personne >= instance->get_Personne_Nbre_WE_Max(personne) ) // Et qu'elle s'apprête à travailler trop de weekends
              || (duree_totale_shift_personne + duree_Min_Shift_Consecutif_Personne > instance->get_Personne_Duree_total_Max(personne))) // Ou la personne ne dépassera pas sa durée maximale de travail
         {
             return false;
@@ -401,7 +402,7 @@ bool is_Peut_Reprendre_Travaille(Instance * instance, int personne, int jour, in
 }
 
 
-int Duree_Minimum_Combinaison_Shift_Possible(Instance * instance, int personne, vector<pair<int,int>> v_v_Shift_trie) {
+int Duree_Minimum_Combinaison_Shift_Possible(Instance * instance, int personne) {
     int nb_shift_consecutif_min = instance->get_Personne_Nbre_Shift_Consecutif_Min(personne);
     vector<int> combinaison_shift(nb_shift_consecutif_min);
     bool est_initialise = false;
@@ -430,9 +431,9 @@ int Duree_Minimum_Combinaison_Shift_Possible(Instance * instance, int personne, 
                 est_Choisi_Shift_Combinaison = true;
             }
         }
-        if (shift >= instance->get_Nombre_Shift())
+        if (!est_Choisi_Shift_Combinaison)
         {
-            cout << "Erreur dans Duree_Minimum_Combinaison_Shift_Possible : Combinaison minimum impossible";
+            cout << "Erreur dans Duree_Minimum_Combinaison_Shift_Possible : Combinaison minimum impossible" << endl;
             break;
         }
         duree_Totale_Combinaison_Shift += instance->get_Shift_Duree(combinaison_shift[i]);
@@ -440,36 +441,3 @@ int Duree_Minimum_Combinaison_Shift_Possible(Instance * instance, int personne, 
 
     return duree_Totale_Combinaison_Shift;
 }
-
-/*
-meilleur_combinaison_shift-consecutif_duree_minimum(tableau_Id-Shift_trié, personne):
-    int combinaison_shift [nb_shift_consecutif_min]
-    bool iniisalise = false
-    int shift =0
-    Tant que (! initialise)
-        si get_Personne_Shift_Nbre_Max(personne,shift) > 0
-            comobinaison_shift[0]= shift
-            initilise = true
-        fin Si
-        shift++
-    fin Tant QUe
-    int dureeTotal =0
-    for (i = 1; i <nb_shift_consecutif_min; i++)
-        bool is_chosen = false
-        shift = 0
-        tant que ( !is_chosen && shift < instance->get_Nombre_Shift())
-            si get_Personne_Shift_Nbre_Max(personne,shift) > 0 &&  is_possible_Shift_Succede(combinaison_shift[i-1],shift)
-                combinsaison_shift[i] = shift
-                is_chosen = true
-            FinSi
-            shift++
-        fin Tantque
-        si(shift >= instance->get_nombre_Shift())
-            break pour
-            Afficher("Erreur combinaison minimum impossible")
-        fin si
-        dureeeTotale += instance->get_Shift_Duree(combinaison_shift[i])
-    fin pour
-    return dureeTotale
-
-*/
