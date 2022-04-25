@@ -14,6 +14,7 @@
 
 using namespace std;
 
+int i_Calcul_Valeur_Fonction_Objectif(Solution* uneSolution, Instance* instance);
 
 bool Comparer(pair<int, int>& a, pair<int, int>& b);
 
@@ -146,6 +147,7 @@ int Resolution(Instance* instance)
      * * * * * * * * * * * */
 
     uneSolution = GenerationSolutionRealisable(instance);
+    uneSolution->i_valeur_fonction_objectif = i_Calcul_Valeur_Fonction_Objectif(uneSolution, instance);
 
 
     std::cout << uneSolution->Verification_Solution(instance);
@@ -154,6 +156,62 @@ int Resolution(Instance* instance)
     delete uneSolution;
     return i_val_Retour_Fct_obj;
 }
+
+
+int i_Calcul_Valeur_Fonction_Objectif(Solution * uneSolution, Instance* instance)
+{
+    int i_fc_obj = 0;
+    vector<vector<int>> v_i_nb_personne_par_Shift_et_jour(instance->get_Nombre_Shift(), vector<int>(instance->get_Nombre_Jour(), 0));
+
+    for (int i = 0; i < uneSolution->v_v_IdShift_Par_Personne_et_Jour.size(); i++) {
+        for (int j = 0; j < uneSolution->v_v_IdShift_Par_Personne_et_Jour[i].size(); j++)
+        {
+            if (uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j] != -1)
+            {
+                v_i_nb_personne_par_Shift_et_jour[uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j]][j] = v_i_nb_personne_par_Shift_et_jour[uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j]][j] + 1;
+            }
+        }
+    }
+    
+    for (int i = 0; i < uneSolution->v_v_IdShift_Par_Personne_et_Jour.size(); i++)
+    {
+        for (int j = 0; j < uneSolution->v_v_IdShift_Par_Personne_et_Jour[i].size(); j++)
+        {
+            if (uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j] != -1)
+            {
+                i_fc_obj = i_fc_obj + instance->get_Poids_Refus_Pers_Jour_Shift(i, j, uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j]);
+            }
+            for (int k = 0; k < instance->get_Nombre_Shift(); k++)
+            {
+                if (uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j] != k)
+                    i_fc_obj = i_fc_obj + instance->get_Poids_Affectation_Pers_Jour_Shift(i, j, k);
+            }
+        }
+    }
+    for (int k = 0; k < instance->get_Nombre_Shift(); k++)
+    {
+        for (int j = 0; j < instance->get_Nombre_Jour(); j++)
+        {
+            if (v_i_nb_personne_par_Shift_et_jour[k][j] < instance->get_Nbre_Personne_Requis_Jour_Shift(j, k))
+                i_fc_obj = i_fc_obj + instance->get_Poids_Personne_En_Moins_Jour_Shift(j, k) * (instance->get_Nbre_Personne_Requis_Jour_Shift(j, k) - v_i_nb_personne_par_Shift_et_jour[k][j]);
+            if (v_i_nb_personne_par_Shift_et_jour[k][j] > instance->get_Nbre_Personne_Requis_Jour_Shift(j, k))
+                i_fc_obj = i_fc_obj + instance->get_Poids_Personne_En_Plus_Jour_Shift(j, k) * (v_i_nb_personne_par_Shift_et_jour[k][j] - instance->get_Nbre_Personne_Requis_Jour_Shift(j, k));
+        }
+    }
+
+    return i_fc_obj;
+}
+
+
+
+// ################### HEURISTIQUE ###################
+
+
+
+
+
+// ################### CREATION 1ERE SOLUTION "REALISABLE" ###################
+
 
 
 bool is_Jour_OFF_Proche_WE(Instance* instance, int jour_OFF, int i_Nbre_Jour_OFF_Consecutif_Min, int i_Nbre_Shift_Consecutif_Min)
@@ -310,6 +368,7 @@ Solution * GenerationSolutionRealisable(Instance * instance) {
                         {
                             if (    ( v_Nbre_Jour_OFF_Consecutif.at(personne) == 0 ) // Si la personne travaille depuis au moins le jour d'avant
                                  || (    v_Nbre_Jour_OFF_Consecutif.at(personne) >= instance->get_Personne_Jour_OFF_Consecutif_Min(personne) // Si la personne a eu assez de repos et peut reprendre son travail
+                                      //&& v_Duree_Totale_Shift_Personne.at(personne) < instance->get_Personne_Duree_total_Min(personne)
                                       && is_Peut_Reprendre_Travail(instance, v_l_Jour_OFF_Proche_WE.at(personne), personne, jour, v_Nbre_WE_Travaille.at(personne), v_Duree_Totale_Shift_Personne.at(personne), v_Duree_Min_Shift_Consecutif_Personne.at(personne)) ) ) // Et que la personne pourra travailler au moins le nombre consécutif minimum de quart d'heure de travail.
                             {
                                 // Choix d'un shift
