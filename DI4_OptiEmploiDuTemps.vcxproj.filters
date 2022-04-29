@@ -33,12 +33,24 @@
     <ClCompile Include="Solution.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Heuristique.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MetaHeuristique.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Instance.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Solution.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Heuristique.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MetaHeuristique.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
