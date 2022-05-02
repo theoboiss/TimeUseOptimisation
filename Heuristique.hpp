@@ -16,9 +16,11 @@ public:
 
 	static Solution* GenerationSolutionRealisable(Instance* instance);
 
+	void static InitValeurFonctionObjectif(Solution* uneSolution, Instance* instance);
+	
 	int static i_Calcul_Valeur_Fonction_Objectif(Solution* uneSolution, Instance* instance);
 
-	int static i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Instance* instance, float coeff_Valeur_FO_Contrainte = 0.2);
+	int static i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Instance* instance, float coeff_Valeur_FO_Contrainte = 0.85);
 
 	bool static is_Peut_Reprendre_Travail(Instance* instance, list<int>& l_Jour_OFF_Proche_WE_Personne, int personne, int jour, int Nbre_WE_Travaille_Personne, int duree_totale_shift_personne, int duree_Min_Shift_Consecutif_Personne);
 

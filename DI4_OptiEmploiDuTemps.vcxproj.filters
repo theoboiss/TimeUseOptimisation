@@ -50,7 +50,7 @@
     <ClInclude Include="Heuristique.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MetaHeuristique.h">
+    <ClInclude Include="MetaHeuristique.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,9 +1,22 @@
 #include "Heuristique.hpp"
 
-
-
 // ################### CALCUL VALEUR FONCTION OBJECTIVE ###################
 
+
+void Heuristique::InitValeurFonctionObjectif(Solution* uneSolution, Instance* instance)
+{
+    if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() == 0 || uneSolution->v_v_IdShift_Par_Personne_et_Jour[0].size() == 0) return;
+
+    uneSolution->i_valeur_fonction_objectif = Heuristique::i_Calcul_Valeur_Fonction_Objectif(uneSolution, instance);
+    //cout << uneSolution->i_valeur_fonction_objectif << " ";
+
+    //uneSolution->Verification_Solution(instance);
+
+    uneSolution->i_valeur_fonction_objectif += Heuristique::i_Calcul_Penalisation_Fonction_Objectif(uneSolution, instance);
+    //cout << uneSolution->i_valeur_fonction_objectif << endl;
+
+    uneSolution->i_valeur_fonction_objectif;
+}
 
 
 int Heuristique::i_Calcul_Valeur_Fonction_Objectif(Solution* uneSolution, Instance* instance)
@@ -49,6 +62,7 @@ int Heuristique::i_Calcul_Valeur_Fonction_Objectif(Solution* uneSolution, Instan
 
     return i_fc_obj;
 }
+
 
 int Heuristique::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Instance* instance, float coeff_Valeur_FO_Contrainte)
 {
@@ -176,7 +190,6 @@ int Heuristique::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, 
 // ################### CREATION 1ERE SOLUTION "REALISABLE" ###################
 
 
-
 bool Heuristique::is_Jour_OFF_Proche_WE(Instance* instance, int jour_OFF, int i_Nbre_Jour_OFF_Consecutif_Min, int i_Nbre_Shift_Consecutif_Min)
 {
     for (int jour_Travail_Apres_Jour_OFF = jour_OFF + i_Nbre_Jour_OFF_Consecutif_Min; jour_Travail_Apres_Jour_OFF < jour_OFF + i_Nbre_Jour_OFF_Consecutif_Min + i_Nbre_Shift_Consecutif_Min; jour_Travail_Apres_Jour_OFF++)
@@ -189,10 +202,12 @@ bool Heuristique::is_Jour_OFF_Proche_WE(Instance* instance, int jour_OFF, int i_
     return false;
 }
 
+
 bool Heuristique::Comparer(pair<int, int>& a, pair<int, int>& b)
 {
     return a.second < b.second;
 }
+
 
 Solution* Heuristique::GenerationSolutionRealisable(Instance* instance) {
     // Initialisation

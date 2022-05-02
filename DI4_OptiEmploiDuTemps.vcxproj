@@ -157,7 +157,7 @@
   <ItemGroup>
     <ClInclude Include="Instance.hpp" />
     <ClInclude Include="Heuristique.hpp" />
-    <ClInclude Include="MetaHeuristique.h" />
+    <ClInclude Include="MetaHeuristique.hpp" />
     <ClInclude Include="Solution.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
