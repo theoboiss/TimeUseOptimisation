@@ -15,9 +15,9 @@ class MetaHeuristique
 {
 public:
 
-	static Solution* MeilleureSolution(Solution solutionRealisable, Instance* instance);
+	static Solution* MeilleureSolution(Solution solutionRealisable, Instance* instance, float coeff_Valeur_FO_Contrainte);
 
-	static Solution* RechercheVoisinageVariable(Solution solutionRealisable, Instance* instance, int k);
+	static Solution* RechercheVoisinageVariable(Solution solutionRealisable, Instance* instance, int k, float coeff_Valeur_FO_Contrainte);
 
 	static int CodageLineaire(int a, int x, int b, int modulo);
 

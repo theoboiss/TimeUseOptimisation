@@ -3,7 +3,7 @@
 // ################### CALCUL VALEUR FONCTION OBJECTIVE ###################
 
 
-void Heuristique::InitValeurFonctionObjectif(Solution* uneSolution, Instance* instance)
+void Heuristique::InitValeurFonctionObjectif(Solution* uneSolution, Instance* instance, float coeff_Valeur_FO_Contrainte)
 {
     if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() == 0 || uneSolution->v_v_IdShift_Par_Personne_et_Jour[0].size() == 0) return;
 
@@ -12,7 +12,7 @@ void Heuristique::InitValeurFonctionObjectif(Solution* uneSolution, Instance* in
 
     //uneSolution->Verification_Solution(instance);
 
-    uneSolution->i_valeur_fonction_objectif += Heuristique::i_Calcul_Penalisation_Fonction_Objectif(uneSolution, instance);
+    uneSolution->i_valeur_fonction_objectif += Heuristique::i_Calcul_Penalisation_Fonction_Objectif(uneSolution, instance, coeff_Valeur_FO_Contrainte);
     //cout << uneSolution->i_valeur_fonction_objectif << endl;
 
     uneSolution->i_valeur_fonction_objectif;
@@ -326,8 +326,10 @@ Solution* Heuristique::GenerationSolutionRealisable(Instance* instance) {
 
     for (int personne = 0; personne < instance->get_Nombre_Personne(); personne++)
     {
+        //cout << "personne " << personne << " ";
         for (int jour = 1; jour < instance->get_Nombre_Jour(); jour++) //On parcourt les jours à partir du deuxième
         {
+            //cout << "jour " << jour << " ";
             int semaine = jour / 7;
             int shift = -1; //Initialisation du shift pour une personne et pour un jour
 
@@ -351,9 +353,10 @@ Solution* Heuristique::GenerationSolutionRealisable(Instance* instance) {
                             {
                                 // Choix d'un shift
                                 bool is_chosen_shift = false;
-                                for (int candidat = 0; (candidat < instance->get_Nombre_Shift()) && (!is_chosen_shift); candidat++) //les id shift correspondent à candidat
+                                for (int iterateur_decroissant = instance->get_Nombre_Shift()-1; (iterateur_decroissant >= 0) && (!is_chosen_shift); iterateur_decroissant--) //les id shift correspondent à candidat
                                 {
                                     // Si la durée totale des shifts de la personne avec le candidat ne dépasse pas la durée maximale
+                                    int candidat = v_v_Shift_trie[iterateur_decroissant].first;
                                     if (v_Duree_Totale_Shift_Personne.at(personne) + instance->get_Shift_Duree(candidat) <= instance->get_Personne_Duree_total_Max(personne))
                                     {
                                         if (S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour - 1) == -1) // Si le jour précédent était un jour repos
@@ -408,6 +411,7 @@ Solution* Heuristique::GenerationSolutionRealisable(Instance* instance) {
                 v_l_Jour_OFF_Proche_WE.at(personne).pop_front();
             }
         }
+        //cout << endl;
     }
     return S;
 }

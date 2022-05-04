@@ -91,25 +91,31 @@ int Resolution(Instance* instance)
 {
     int i_val_Retour_Fct_obj = 0;
     Solution* solutionInitiale = new Solution();
+    float coeff_Valeur_FO_Contrainte = 0.85;
 
     solutionInitiale = Heuristique::GenerationSolutionRealisable(instance);
-    Heuristique::InitValeurFonctionObjectif(solutionInitiale, instance);
+    Heuristique::InitValeurFonctionObjectif(solutionInitiale, instance, coeff_Valeur_FO_Contrainte);
 
-    printSolution(solutionInitiale);
+    //printSolution(solutionInitiale);
     i_val_Retour_Fct_obj = solutionInitiale->i_valeur_fonction_objectif;
-    cout << "Valeur de la fonction objectif : " << solutionInitiale->i_valeur_fonction_objectif << endl;
+    solutionInitiale->Verification_Solution(instance);
+    cout << "Valeur de la fonction objective sans pénalités : " << Heuristique::i_Calcul_Valeur_Fonction_Objectif(solutionInitiale, instance) << endl;
+    cout << "Valeur de la fonction objectif : " << solutionInitiale->i_valeur_fonction_objectif << endl << endl;
 
-
-    Solution* meilleureSolutionTrouvee = MetaHeuristique::MeilleureSolution(*solutionInitiale, instance); // Valeur de la FO initialisé dedans
+    
+    /*Solution* meilleureSolutionTrouvee = MetaHeuristique::MeilleureSolution(*solutionInitiale, instance, coeff_Valeur_FO_Contrainte); // Valeur de la FO initialisé dedans
     if (meilleureSolutionTrouvee)
     {
-        cout << endl;
-        printSolution(meilleureSolutionTrouvee);
+        //printSolution(meilleureSolutionTrouvee);
         i_val_Retour_Fct_obj = meilleureSolutionTrouvee->i_valeur_fonction_objectif;
         cout << "Valeur de la fonction objectif : " << meilleureSolutionTrouvee->i_valeur_fonction_objectif << endl;
         meilleureSolutionTrouvee->Verification_Solution(instance);
         delete meilleureSolutionTrouvee;
     }
+    else
+    {
+        cout << "Pas de meilleure solution trouvée" << endl;
+    }*/
     delete solutionInitiale;
     return i_val_Retour_Fct_obj;
 }

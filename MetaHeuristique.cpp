@@ -1,19 +1,19 @@
 #include "MetaHeuristique.hpp"
 
 
-Solution* MetaHeuristique::MeilleureSolution(Solution solutionRealisable, Instance* instance)
+Solution* MetaHeuristique::MeilleureSolution(Solution solutionRealisable, Instance* instance, float coeff_Valeur_FO_Contrainte)
 {
     int kmax = 3;
     int k = 1;
     int iterateur = 1;
     Solution* meilleureSolution = &solutionRealisable;
 
-    cout << endl << "Debug" << endl;
+    //cout << endl << "Debug" << endl;
     while (k <= kmax)
     {
         cout << iterateur;
         cout << " " << k;
-        Solution* meilleureSolutionVoisinage = RechercheVoisinageVariable(*meilleureSolution, instance, k);
+        Solution* meilleureSolutionVoisinage = RechercheVoisinageVariable(*meilleureSolution, instance, k, coeff_Valeur_FO_Contrainte);
         if (meilleureSolutionVoisinage == nullptr)
         {
             k = k + 1;
@@ -25,6 +25,8 @@ Solution* MetaHeuristique::MeilleureSolution(Solution solutionRealisable, Instan
                 delete meilleureSolution;
             }
             meilleureSolution = meilleureSolutionVoisinage;
+            cout << "!";
+            k = 1;
         }
         else
         {
@@ -43,7 +45,7 @@ Solution* MetaHeuristique::MeilleureSolution(Solution solutionRealisable, Instan
 }
 
 
-Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisable, Instance* instance, int k)
+Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisable, Instance* instance, int k, float coeff_Valeur_FO_Contrainte)
 {
     Solution* candidat = &solutionRealisable;
 
@@ -52,20 +54,20 @@ Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisabl
     {
     case 1:
         /*
-        * Opérateur de swap des jours en codage lineaire
-        * Domaine de définition de a : {0..nombre_jour}
-        * Domaine de définition de b : {0..nombre_jour}
+        * Opérateur de swap des personnes en codage lineaire
+        * Domaine de définition de a : {0..nombre_personne}
+        * Domaine de définition de b : {0..nombre_personne}
         */
-        nombre_jour = instance->get_Nombre_Jour();
-        for (int a = 1; a < nombre_jour; a++)
+        nombre_personne = instance->get_Nombre_Personne();
+        for (int a = 1; a < nombre_personne; a = a + nombre_personne / 10)
         {
-            for (int b = 0; b < nombre_jour; b++)
+            for (int b = 0; b < nombre_personne; b = b + nombre_personne / 10)
             {
                 cout << " .";
-                Solution* solutionVoisine = OperateurSwapJourCodageLineaire(&solutionRealisable, a, b);
-                Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance);
+                Solution* solutionVoisine = OperateurSwapPersonneCodageLineaire(&solutionRealisable, a, b);
+                Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance, coeff_Valeur_FO_Contrainte);
 
-                if (solutionVoisine->i_valeur_fonction_objectif < candidat->i_valeur_fonction_objectif)
+                if (solutionVoisine->i_valeur_fonction_objectif >= 0 && solutionVoisine->i_valeur_fonction_objectif < candidat->i_valeur_fonction_objectif)
                 {
                     candidat = solutionVoisine;
                 }
@@ -75,20 +77,20 @@ Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisabl
 
     case 2:
         /*
-        * Opérateur de swap des personnes en codage lineaire
-        * Domaine de définition de a : {0..nombre_personne}
-        * Domaine de définition de b : {0..nombre_personne}
+        * Opérateur de swap des jours en codage lineaire
+        * Domaine de définition de a : {0..nombre_jour}
+        * Domaine de définition de b : {0..nombre_jour}
         */
-        nombre_personne = instance->get_Nombre_Personne();
-        for (int a = 1; a < nombre_personne; a++)
+        nombre_jour = instance->get_Nombre_Jour();
+        for (int a = 1; a < nombre_jour; a = a + nombre_jour / 20)
         {
-            for (int b = 0; b < nombre_personne; b++)
+            for (int b = 0; b < nombre_jour; b = b + nombre_jour / 20)
             {
                 cout << " .";
-                Solution* solutionVoisine = OperateurSwapPersonneCodageLineaire(&solutionRealisable, a, b);
-                Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance);
+                Solution* solutionVoisine = OperateurSwapJourCodageLineaire(&solutionRealisable, a, b);
+                Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance, coeff_Valeur_FO_Contrainte);
 
-                if (solutionVoisine->i_valeur_fonction_objectif < candidat->i_valeur_fonction_objectif)
+                if (solutionVoisine->i_valeur_fonction_objectif >= 0 && solutionVoisine->i_valeur_fonction_objectif < candidat->i_valeur_fonction_objectif)
                 {
                     candidat = solutionVoisine;
                 }
@@ -105,15 +107,15 @@ Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisabl
         nombre_shift = instance->get_Nombre_Shift();
         nombre_personne = instance->get_Nombre_Personne();
         nombre_jour = instance->get_Nombre_Jour();
-        for (int a = 0; a < nombre_shift; a++)
+        for (int a = 0; a < nombre_shift; a = a + nombre_shift/8)
         {
-            for (int b = 0; b < nombre_shift; b++)
+            for (int b = 0; b < nombre_shift; b = b + nombre_shift/8)
             {
                 cout << " .";
                 Solution* solutionVoisine = OperateurModificationShiftCodageLineaire(&solutionRealisable, a, b, 0, 1, 0, 1, instance->get_Nombre_Shift());
-                Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance);
+                Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance, coeff_Valeur_FO_Contrainte);
 
-                if (solutionVoisine->i_valeur_fonction_objectif < candidat->i_valeur_fonction_objectif)
+                if (solutionVoisine->i_valeur_fonction_objectif >= 0 && solutionVoisine->i_valeur_fonction_objectif < candidat->i_valeur_fonction_objectif)
                 {
                     candidat = solutionVoisine;
                 }
@@ -179,7 +181,6 @@ Solution* MetaHeuristique::OperateurSwapPersonneCodageLineaire(Solution* uneSolu
 
     for (int personne = 0; personne < nbPersonne; personne++)
     {
-        unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(nbJour);
         for (int jour = 0; jour < nbJour; jour++)
         {
             // Swap entre les personnes
@@ -207,7 +208,11 @@ Solution* MetaHeuristique::OperateurModificationShiftCodageLineaire(Solution* un
         for (int jour = e; jour < nbJour; jour = jour + f)
         {
             // Modifie les shifts
-            unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = CodageLineaire(a, uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour], b, nombreShift);
+            int& shift = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
+            if (shift != -1)
+            {
+                shift = CodageLineaire(a, shift, b, nombreShift);
+            }
         }
     }
 
