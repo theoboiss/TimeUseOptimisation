@@ -49,10 +49,50 @@ Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisabl
 {
     Solution* candidat = &solutionRealisable;
 
-    int nombre_personne, nombre_jour, nombre_shift;
+    int nombre_personne, nombre_jour, nombre_shift, nbIterMax;
     switch (k)
     {
     case 1:
+        /*
+        * Opérateur de modification des shifts aléatoire
+        * Domaine de définition de proba : ]0..1]
+        */
+        nombre_shift = instance->get_Nombre_Shift();
+        nombre_personne = instance->get_Nombre_Personne();
+        nombre_jour = instance->get_Nombre_Jour();
+        nbIterMax = nombre_personne + nombre_jour;
+        for (float proba = 0.5; proba > 0; proba = proba - 0.01)
+        {
+            for (int nbIter = 0; nbIter < nbIterMax; nbIter++)
+            {
+                cout << " .";
+                Solution* solutionVoisine = OperateurModificationShiftAleatoire(&solutionRealisable, instance, instance->get_Nombre_Shift(), proba);
+                Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance, coeff_Valeur_FO_Contrainte);
+
+                /*if (proba < 0.02 && nbIter == nbIterMax - 1) {
+                    for (int personne = 0; personne < solutionVoisine->v_v_IdShift_Par_Personne_et_Jour.size(); personne++)
+                    {
+                        for (int jour = 1; jour < solutionVoisine->v_v_IdShift_Par_Personne_et_Jour[personne].size(); jour++) // On parcourt les jours à partir du deuxième
+                        {
+                            cout << solutionVoisine->v_v_IdShift_Par_Personne_et_Jour[personne][jour] << '\t';
+                        }
+                        cout << endl;
+                    }
+                }*/
+
+                if (solutionVoisine->i_valeur_fonction_objectif >= 0 && solutionVoisine->i_valeur_fonction_objectif < candidat->i_valeur_fonction_objectif)
+                {
+                    candidat = solutionVoisine;
+                }
+                else
+                {
+                    delete solutionVoisine;
+                }
+            }
+        }
+        break;
+
+    case 2:
         /*
         * Opérateur de swap des personnes en codage lineaire
         * Domaine de définition de a : {0..nombre_personne}
@@ -71,11 +111,15 @@ Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisabl
                 {
                     candidat = solutionVoisine;
                 }
+                else
+                {
+                    delete solutionVoisine;
+                }
             }
         }
         break;
 
-    case 2:
+    case 3:
         /*
         * Opérateur de swap des jours en codage lineaire
         * Domaine de définition de a : {0..nombre_jour}
@@ -94,15 +138,19 @@ Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisabl
                 {
                     candidat = solutionVoisine;
                 }
+                else
+                {
+                    delete solutionVoisine;
+                }
             }
         }
         break;
 
-    case 3:
+    case 4:
         /*
         * Opérateur de modification des shifts en codage lineaire
-        * Domaine de définition de a : {0..personne}
-        * Domaine de définition de b : {0..personne}
+        * Domaine de définition de a : {0..nombre_personne}
+        * Domaine de définition de b : {0..nombre_personne}
         */
         nombre_shift = instance->get_Nombre_Shift();
         nombre_personne = instance->get_Nombre_Personne();
@@ -118,6 +166,10 @@ Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisabl
                 if (solutionVoisine->i_valeur_fonction_objectif >= 0 && solutionVoisine->i_valeur_fonction_objectif < candidat->i_valeur_fonction_objectif)
                 {
                     candidat = solutionVoisine;
+                }
+                else
+                {
+                    delete solutionVoisine;
                 }
             }
         }
@@ -220,10 +272,48 @@ Solution* MetaHeuristique::OperateurModificationShiftCodageLineaire(Solution* un
 }
 
 
-Solution* MetaHeuristique::OperateurModificationShiftAleatoire(Solution* uneSolution)
+Solution* MetaHeuristique::OperateurModificationShiftAleatoire(Solution* uneSolution, Instance* instance, int nombreShift, float proba)
 {
     if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() == 0) return nullptr;
 
+    int nbPersonne = uneSolution->v_v_IdShift_Par_Personne_et_Jour.size();
+    int nbJour = uneSolution->v_v_IdShift_Par_Personne_et_Jour[0].size();
 
-    return nullptr;
+    Solution* unVoisin = new Solution();
+    unVoisin->v_v_IdShift_Par_Personne_et_Jour = vector<vector<int>>(nbPersonne);
+
+    for (int personne = 0; personne < nbPersonne; personne++)
+    {
+        unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(nbJour);
+        for (int jour = 1; jour < nbJour; jour++)
+        {
+            if ( ((float) (rand() % 100)) / 100 < proba)
+            {
+                int shift_jour_k = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
+                // Modifie les shifts
+                if (shift_jour_k != -1)
+                {
+                    int k = 0;
+                    int shift_jour_kM1 = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour - 1];
+                    while( jour+k < nbJour && shift_jour_kM1 != -1 && shift_jour_k != -1
+                        && instance->is_possible_Shift_Succede(shift_jour_kM1, shift_jour_k))
+                    {
+                        int compteur_shift = 0;
+                        shift_jour_kM1 = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour + k - 1];
+                        shift_jour_k = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour + k];
+                        while ( compteur_shift < nombreShift && jour+k < nbJour && shift_jour_kM1 != -1 && shift_jour_k != -1
+                            && instance->is_possible_Shift_Succede(shift_jour_kM1, shift_jour_k))
+                        {
+                            shift_jour_k = (shift_jour_k + 1) % nombreShift;
+                            compteur_shift++;
+                        }
+                        k++;
+                    }
+                }
+                unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = shift_jour_k;
+            }
+        }
+    }
+
+    return unVoisin;
 }

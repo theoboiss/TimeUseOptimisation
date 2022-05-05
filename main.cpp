@@ -103,7 +103,7 @@ int Resolution(Instance* instance)
     cout << "Valeur de la fonction objectif : " << solutionInitiale->i_valeur_fonction_objectif << endl << endl;
 
     
-    /*Solution* meilleureSolutionTrouvee = MetaHeuristique::MeilleureSolution(*solutionInitiale, instance, coeff_Valeur_FO_Contrainte); // Valeur de la FO initialisé dedans
+    Solution* meilleureSolutionTrouvee = MetaHeuristique::MeilleureSolution(*solutionInitiale, instance, coeff_Valeur_FO_Contrainte); // Valeur de la FO initialisé dedans
     if (meilleureSolutionTrouvee)
     {
         //printSolution(meilleureSolutionTrouvee);
@@ -115,7 +115,7 @@ int Resolution(Instance* instance)
     else
     {
         cout << "Pas de meilleure solution trouvée" << endl;
-    }*/
+    }
     delete solutionInitiale;
     return i_val_Retour_Fct_obj;
 }

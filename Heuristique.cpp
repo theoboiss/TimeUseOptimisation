@@ -353,10 +353,9 @@ Solution* Heuristique::GenerationSolutionRealisable(Instance* instance) {
                             {
                                 // Choix d'un shift
                                 bool is_chosen_shift = false;
-                                for (int iterateur_decroissant = instance->get_Nombre_Shift()-1; (iterateur_decroissant >= 0) && (!is_chosen_shift); iterateur_decroissant--) //les id shift correspondent à candidat
+                                for (int candidat = 0; (candidat < instance->get_Nombre_Shift()) && (!is_chosen_shift); candidat++) //les id shift correspondent à candidat
                                 {
                                     // Si la durée totale des shifts de la personne avec le candidat ne dépasse pas la durée maximale
-                                    int candidat = v_v_Shift_trie[iterateur_decroissant].first;
                                     if (v_Duree_Totale_Shift_Personne.at(personne) + instance->get_Shift_Duree(candidat) <= instance->get_Personne_Duree_total_Max(personne))
                                     {
                                         if (S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour - 1) == -1) // Si le jour précédent était un jour repos

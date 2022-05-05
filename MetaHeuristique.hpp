@@ -27,7 +27,7 @@ public:
 
 	static Solution* OperateurModificationShiftCodageLineaire(Solution* uneSolution, int a, int b, int c, int d, int e, int f, int nombreShift);
 
-	static Solution* OperateurModificationShiftAleatoire(Solution* uneSolution);
+	static Solution* OperateurModificationShiftAleatoire(Solution* uneSolution, Instance* instance, int nombreShift, float proba);
 
 };
 
