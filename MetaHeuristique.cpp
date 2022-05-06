@@ -287,13 +287,13 @@ Solution* MetaHeuristique::OperateurModificationShiftAleatoire(Solution* uneSolu
         unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(nbJour);
         for (int jour = 1; jour < nbJour; jour++)
         {
+            int k = 0;
+            int shift_jour_k = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
             if ( ((float) (rand() % 100)) / 100 < proba)
             {
-                int shift_jour_k = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
                 // Modifie les shifts
                 if (shift_jour_k != -1)
                 {
-                    int k = 0;
                     int shift_jour_kM1 = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour - 1];
                     while( jour+k < nbJour && shift_jour_kM1 != -1 && shift_jour_k != -1
                         && instance->is_possible_Shift_Succede(shift_jour_kM1, shift_jour_k))
@@ -307,11 +307,27 @@ Solution* MetaHeuristique::OperateurModificationShiftAleatoire(Solution* uneSolu
                             shift_jour_k = (shift_jour_k + 1) % nombreShift;
                             compteur_shift++;
                         }
+                        unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = shift_jour_k;
                         k++;
                     }
+                    if (shift_jour_kM1 == -1)
+                    {
+                        shift_jour_k = (shift_jour_k + 1) % nombreShift;
+                        unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = shift_jour_k;
+                    }
                 }
-                unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = shift_jour_k;
+                else
+                {
+                    unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = -1;
+                    k += 1;
+                }
             }
+            else
+            {
+                unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = shift_jour_k;
+                k += 1;
+            }
+            jour += k - 1;
         }
     }
 
