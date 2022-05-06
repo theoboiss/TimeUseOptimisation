@@ -29,5 +29,7 @@ public:
 
 	static Solution* OperateurModificationShiftAleatoire(Solution* uneSolution, Instance* instance, int nombreShift, float proba);
 
+	static Solution* CopieSolution(Solution* uneSolution);
+
 };
 

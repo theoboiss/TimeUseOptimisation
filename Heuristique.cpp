@@ -12,7 +12,7 @@ void Heuristique::InitValeurFonctionObjectif(Solution* uneSolution, Instance* in
 
     //uneSolution->Verification_Solution(instance);
 
-    uneSolution->i_valeur_fonction_objectif += Heuristique::i_Calcul_Penalisation_Fonction_Objectif(uneSolution, instance, coeff_Valeur_FO_Contrainte);
+    uneSolution->i_valeur_fonction_objectif = log10(uneSolution->i_valeur_fonction_objectif) + Heuristique::i_Calcul_Penalisation_Fonction_Objectif(uneSolution, instance, coeff_Valeur_FO_Contrainte);
     //cout << uneSolution->i_valeur_fonction_objectif << endl;
 
     uneSolution->i_valeur_fonction_objectif;
@@ -66,16 +66,15 @@ int Heuristique::i_Calcul_Valeur_Fonction_Objectif(Solution* uneSolution, Instan
 
 int Heuristique::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Instance* instance, float coeff_Valeur_FO_Contrainte)
 {
-    int i_fc_obj_penalisation = 0;
+    int nombre_contraintes_non_respectees = 0;
     bool b_test_si_premier_jour_off = false;
-    int poids, i, j, jj, k, i_duree_travail, i_shift_consecutif, i_nb_WE;
+    int i, j, jj, k, i_duree_travail, i_shift_consecutif, i_nb_WE;
     vector<vector<int>> v_i_nb_personne_par_Shift_et_jour(instance->get_Nombre_Shift(), vector<int>(instance->get_Nombre_Jour(), 0));
 
-    poids = uneSolution->i_valeur_fonction_objectif * coeff_Valeur_FO_Contrainte;
     //Vérification de la taille de v_v_IdShift_Par_Personne_et_Jour
     if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() != instance->get_Nombre_Personne())
     {
-        i_fc_obj_penalisation = i_fc_obj_penalisation + poids;
+        nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
     }
     for (i = 0; i < uneSolution->v_v_IdShift_Par_Personne_et_Jour.size(); i++)
     {
@@ -85,14 +84,14 @@ int Heuristique::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, 
         i_nb_WE = 0;
         if (uneSolution->v_v_IdShift_Par_Personne_et_Jour[i].size() != instance->get_Nombre_Jour())
         {
-            i_fc_obj_penalisation = i_fc_obj_penalisation + poids;
+            nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
         }
         //Vérification que uneSolution->v_v_IdShift_Par_Personne_et_Jour contient que des Ids Shifts valident ou -1
         for (j = 0; j < uneSolution->v_v_IdShift_Par_Personne_et_Jour[i].size(); j++)
         {
             if ((uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j] != -1) && ((uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j] < 0) || (uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j] > instance->get_Nombre_Shift())))
             {
-                i_fc_obj_penalisation = i_fc_obj_penalisation + poids;
+                nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
             }
             else
             {
@@ -109,14 +108,14 @@ int Heuristique::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, 
                     //Vérification du nombre de shifts consécutifs maximum assignable à chaque personne
                     if (i_shift_consecutif > instance->get_Personne_Nbre_Shift_Consecutif_Max(i))
                     {
-                        i_fc_obj_penalisation = i_fc_obj_penalisation + poids;
+                        nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
                     }
 
                     //Vérification des jours de congés de chaque personne
                     if (!instance->is_Available_Personne_Jour(i, j))
                     {
                         {
-                            i_fc_obj_penalisation = i_fc_obj_penalisation + poids;
+                            nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
                         }
                     }
                 }
@@ -125,7 +124,7 @@ int Heuristique::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, 
                     //Vérification du nombre de shifts consécutifs minimum assignable à chaque personne
                     if ((i_shift_consecutif < instance->get_Personne_Nbre_Shift_Consecutif_Min(i)) && (i_shift_consecutif != 0) && ((j - instance->get_Personne_Nbre_Shift_Consecutif_Min(i)) > 0))
                     {
-                        i_fc_obj_penalisation = i_fc_obj_penalisation + poids;
+                        nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
                     }
                     i_shift_consecutif = 0;
                     b_test_si_premier_jour_off = false;
@@ -145,7 +144,7 @@ int Heuristique::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, 
                         }
                         if (b_test_si_premier_jour_off)
                         {
-                            i_fc_obj_penalisation = i_fc_obj_penalisation + poids;
+                            nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
                         }
                     }
                 }
@@ -156,7 +155,7 @@ int Heuristique::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, 
                     {
                         if (!instance->is_possible_Shift_Succede(uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j], uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j + 1]))
                         {
-                            i_fc_obj_penalisation = i_fc_obj_penalisation + poids;
+                            nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
                         }
                     }
                 }
@@ -165,24 +164,25 @@ int Heuristique::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, 
         //Vérification de la durée totale maximale et minimale de chaque personne
         if ((i_duree_travail > instance->get_Personne_Duree_total_Max(i)) || (i_duree_travail < instance->get_Personne_Duree_total_Min(i)))
         {
-            i_fc_obj_penalisation = i_fc_obj_penalisation + poids;
+            nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
         }
         //Vérification du nombre de WE (samedi ou/et dimanche) de travail maximal pour chaque personne
         if (i_nb_WE > instance->get_Personne_Nbre_WE_Max(i))
         {
-            i_fc_obj_penalisation = i_fc_obj_penalisation + poids;
+            nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
         }
         //Vérification du nombre maximal de shifts de chaque personne
         for (j = 0; j < instance->get_Nombre_Shift(); j++)
         {
             if (v_i_Nb_shift[j] > instance->get_Personne_Shift_Nbre_Max(i, j))
             {
-                i_fc_obj_penalisation = i_fc_obj_penalisation + poids;
+                nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
             }
         }
     }
 
-    return i_fc_obj_penalisation;
+    int poids = log10(10+uneSolution->i_valeur_fonction_objectif * coeff_Valeur_FO_Contrainte);
+    return nombre_contraintes_non_respectees * poids;
 }
 
 

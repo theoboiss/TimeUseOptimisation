@@ -108,8 +108,9 @@ int Resolution(Instance* instance)
     {
         //printSolution(meilleureSolutionTrouvee);
         i_val_Retour_Fct_obj = meilleureSolutionTrouvee->i_valeur_fonction_objectif;
-        cout << "Valeur de la fonction objectif : " << meilleureSolutionTrouvee->i_valeur_fonction_objectif << endl;
         meilleureSolutionTrouvee->Verification_Solution(instance);
+        cout << "Valeur de la fonction objective sans pénalités : " << Heuristique::i_Calcul_Valeur_Fonction_Objectif(meilleureSolutionTrouvee, instance) << endl;
+        cout << "Valeur de la fonction objectif : " << meilleureSolutionTrouvee->i_valeur_fonction_objectif << endl << endl;
         delete meilleureSolutionTrouvee;
     }
     else

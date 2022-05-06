@@ -1,6 +1,28 @@
 #include "MetaHeuristique.hpp"
 
 
+Solution* MetaHeuristique::CopieSolution(Solution* uneSolution)
+{
+    if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() == 0) return nullptr;
+
+    int nbPersonne = uneSolution->v_v_IdShift_Par_Personne_et_Jour.size();
+    int nbJour = uneSolution->v_v_IdShift_Par_Personne_et_Jour[0].size();
+
+    Solution* Copie = new Solution();
+
+    Copie->v_v_IdShift_Par_Personne_et_Jour = vector<vector<int>>(nbPersonne);
+    for (int personne = 0; personne < nbPersonne; personne++)
+    {
+        Copie->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(nbJour);
+        for (int jour = 0; jour < nbJour; jour++)
+        {
+            Copie->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
+        }
+    }
+    return Copie;
+}
+
+
 Solution* MetaHeuristique::MeilleureSolution(Solution solutionRealisable, Instance* instance, float coeff_Valeur_FO_Contrainte)
 {
     int kmax = 3;
@@ -61,7 +83,7 @@ Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisabl
         nombre_personne = instance->get_Nombre_Personne();
         nombre_jour = instance->get_Nombre_Jour();
         nbIterMax = nombre_personne + nombre_jour;
-        for (float proba = 0.5; proba > 0; proba = proba - 0.01)
+        for (float proba = 0.9; proba > 0; proba = proba - 0.1)
         {
             for (int nbIter = 0; nbIter < nbIterMax; nbIter++)
             {
@@ -287,47 +309,23 @@ Solution* MetaHeuristique::OperateurModificationShiftAleatoire(Solution* uneSolu
         unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(nbJour);
         for (int jour = 1; jour < nbJour; jour++)
         {
-            int k = 0;
-            int shift_jour_k = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
             if ( ((float) (rand() % 100)) / 100 < proba)
             {
+                int shift_personne_jour_alea = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
                 // Modifie les shifts
-                if (shift_jour_k != -1)
+                if (shift_personne_jour_alea != -1)
                 {
-                    int shift_jour_kM1 = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour - 1];
-                    while( jour+k < nbJour && shift_jour_kM1 != -1 && shift_jour_k != -1
-                        && instance->is_possible_Shift_Succede(shift_jour_kM1, shift_jour_k))
-                    {
-                        int compteur_shift = 0;
-                        shift_jour_kM1 = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour + k - 1];
-                        shift_jour_k = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour + k];
-                        while ( compteur_shift < nombreShift && jour+k < nbJour && shift_jour_kM1 != -1 && shift_jour_k != -1
-                            && instance->is_possible_Shift_Succede(shift_jour_kM1, shift_jour_k))
-                        {
-                            shift_jour_k = (shift_jour_k + 1) % nombreShift;
-                            compteur_shift++;
-                        }
-                        unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = shift_jour_k;
-                        k++;
-                    }
-                    if (shift_jour_kM1 == -1)
-                    {
-                        shift_jour_k = (shift_jour_k + 1) % nombreShift;
-                        unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = shift_jour_k;
-                    }
+                    unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = rand() % nombreShift;
                 }
                 else
                 {
                     unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = -1;
-                    k += 1;
                 }
             }
             else
             {
-                unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = shift_jour_k;
-                k += 1;
+                unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
             }
-            jour += k - 1;
         }
     }
 
