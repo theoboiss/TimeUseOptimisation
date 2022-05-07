@@ -1,26 +1,9 @@
 #include "MetaHeuristique.hpp"
 
+using namespace std;
 
-Solution* MetaHeuristique::CopieSolution(Solution* uneSolution)
-{
-    if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() == 0) return nullptr;
 
-    int nbPersonne = uneSolution->v_v_IdShift_Par_Personne_et_Jour.size();
-    int nbJour = uneSolution->v_v_IdShift_Par_Personne_et_Jour[0].size();
-
-    Solution* Copie = new Solution();
-
-    Copie->v_v_IdShift_Par_Personne_et_Jour = vector<vector<int>>(nbPersonne);
-    for (int personne = 0; personne < nbPersonne; personne++)
-    {
-        Copie->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(nbJour);
-        for (int jour = 0; jour < nbJour; jour++)
-        {
-            Copie->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
-        }
-    }
-    return Copie;
-}
+// ################### ALGORITHMES GENERAUX ###################
 
 
 Solution* MetaHeuristique::MeilleureSolution(Solution solutionRealisable, Instance* instance, float coeff_Valeur_FO_Contrainte)
@@ -34,7 +17,7 @@ Solution* MetaHeuristique::MeilleureSolution(Solution solutionRealisable, Instan
     while (k <= kmax)
     {
         cout << iterateur;
-        cout << " " << k;
+        cout << " " << k << endl;
         Solution* meilleureSolutionVoisinage = RechercheVoisinageVariable(*meilleureSolution, instance, k, coeff_Valeur_FO_Contrainte);
         if (meilleureSolutionVoisinage == nullptr)
         {
@@ -47,7 +30,7 @@ Solution* MetaHeuristique::MeilleureSolution(Solution solutionRealisable, Instan
                 delete meilleureSolution;
             }
             meilleureSolution = meilleureSolutionVoisinage;
-            cout << "!";
+            //cout << "!";
             k = 1;
         }
         else
@@ -67,48 +50,48 @@ Solution* MetaHeuristique::MeilleureSolution(Solution solutionRealisable, Instan
 }
 
 
+
 Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisable, Instance* instance, int k, float coeff_Valeur_FO_Contrainte)
 {
-    Solution* candidat = &solutionRealisable;
+    Solution* p_candidat = &solutionRealisable;
+    Solution solutionVoisine = *p_candidat;
 
     int nombre_personne, nombre_jour, nombre_shift, nbIterMax;
+    nombre_shift = instance->get_Nombre_Shift();
+    nombre_personne = instance->get_Nombre_Personne();
+    nombre_jour = instance->get_Nombre_Jour();
+    nbIterMax = nombre_personne + nombre_jour;
+
+    list<int> personnes_problematiques = Outils::Personne_Contraintes_Non_Respectes(p_candidat, instance);
+
     switch (k)
     {
     case 1:
         /*
-        * Opérateur de modification des shifts aléatoire
+        * Opérateur de modification des shifts
         * Domaine de définition de proba : ]0..1]
         */
-        nombre_shift = instance->get_Nombre_Shift();
-        nombre_personne = instance->get_Nombre_Personne();
-        nombre_jour = instance->get_Nombre_Jour();
-        nbIterMax = nombre_personne + nombre_jour;
-        for (float proba = 0.9; proba > 0; proba = proba - 0.1)
+        if (personnes_problematiques.size() == 0)
         {
-            for (int nbIter = 0; nbIter < nbIterMax; nbIter++)
+            for (int personne = 0; personne < nombre_personne; personne++)
             {
-                cout << " .";
-                Solution* solutionVoisine = OperateurModificationShiftAleatoire(&solutionRealisable, instance, instance->get_Nombre_Shift(), proba);
-                Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance, coeff_Valeur_FO_Contrainte);
-
-                /*if (proba < 0.02 && nbIter == nbIterMax - 1) {
-                    for (int personne = 0; personne < solutionVoisine->v_v_IdShift_Par_Personne_et_Jour.size(); personne++)
-                    {
-                        for (int jour = 1; jour < solutionVoisine->v_v_IdShift_Par_Personne_et_Jour[personne].size(); jour++) // On parcourt les jours à partir du deuxième
-                        {
-                            cout << solutionVoisine->v_v_IdShift_Par_Personne_et_Jour[personne][jour] << '\t';
-                        }
-                        cout << endl;
-                    }
-                }*/
-
-                if (solutionVoisine->i_valeur_fonction_objectif >= 0 && solutionVoisine->i_valeur_fonction_objectif < candidat->i_valeur_fonction_objectif)
+                for (int jour = 0; jour < nombre_jour; jour++)
                 {
-                    candidat = solutionVoisine;
+                    OperationOperateurModificationShift(&solutionRealisable, &p_candidat, &solutionVoisine, instance, coeff_Valeur_FO_Contrainte,
+                        personne, jour, nombre_personne, nombre_jour, nombre_shift);
                 }
-                else
+            }
+        }
+        else
+        {
+            for (int ite_personne = 0; ite_personne < personnes_problematiques.size() ; ite_personne++)
+            {
+                int personne = personnes_problematiques.front();
+                personnes_problematiques.pop_front();
+                for (int jour = 0; jour < nombre_jour; jour++)
                 {
-                    delete solutionVoisine;
+                    OperationOperateurModificationShift(&solutionRealisable, &p_candidat, &solutionVoisine, instance, coeff_Valeur_FO_Contrainte,
+                        personne, jour, nombre_personne, nombre_jour, nombre_shift);
                 }
             }
         }
@@ -120,22 +103,18 @@ Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisabl
         * Domaine de définition de a : {0..nombre_personne}
         * Domaine de définition de b : {0..nombre_personne}
         */
-        nombre_personne = instance->get_Nombre_Personne();
         for (int a = 1; a < nombre_personne; a = a + nombre_personne / 10)
         {
             for (int b = 0; b < nombre_personne; b = b + nombre_personne / 10)
             {
-                cout << " .";
-                Solution* solutionVoisine = OperateurSwapPersonneCodageLineaire(&solutionRealisable, a, b);
-                Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance, coeff_Valeur_FO_Contrainte);
-
-                if (solutionVoisine->i_valeur_fonction_objectif >= 0 && solutionVoisine->i_valeur_fonction_objectif < candidat->i_valeur_fonction_objectif)
+                for (int personne = 0; personne < nombre_personne; personne++)
                 {
-                    candidat = solutionVoisine;
-                }
-                else
-                {
-                    delete solutionVoisine;
+                    for (int jour = 0; jour < nombre_jour; jour++)
+                    {
+                        OperationOperateurSwapCodageLineaire(&solutionRealisable, &p_candidat, &solutionVoisine, instance, coeff_Valeur_FO_Contrainte,
+                            personne, jour, nombre_personne,
+                            OperateurSwapPersonneCodageLineaire, a, b);
+                    }
                 }
             }
         }
@@ -147,187 +126,132 @@ Solution* MetaHeuristique::RechercheVoisinageVariable(Solution solutionRealisabl
         * Domaine de définition de a : {0..nombre_jour}
         * Domaine de définition de b : {0..nombre_jour}
         */
-        nombre_jour = instance->get_Nombre_Jour();
         for (int a = 1; a < nombre_jour; a = a + nombre_jour / 20)
         {
             for (int b = 0; b < nombre_jour; b = b + nombre_jour / 20)
             {
-                cout << " .";
-                Solution* solutionVoisine = OperateurSwapJourCodageLineaire(&solutionRealisable, a, b);
-                Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance, coeff_Valeur_FO_Contrainte);
-
-                if (solutionVoisine->i_valeur_fonction_objectif >= 0 && solutionVoisine->i_valeur_fonction_objectif < candidat->i_valeur_fonction_objectif)
+                for (int personne = 0; personne < nombre_personne; personne++)
                 {
-                    candidat = solutionVoisine;
-                }
-                else
-                {
-                    delete solutionVoisine;
-                }
-            }
-        }
-        break;
-
-    case 4:
-        /*
-        * Opérateur de modification des shifts en codage lineaire
-        * Domaine de définition de a : {0..nombre_personne}
-        * Domaine de définition de b : {0..nombre_personne}
-        */
-        nombre_shift = instance->get_Nombre_Shift();
-        nombre_personne = instance->get_Nombre_Personne();
-        nombre_jour = instance->get_Nombre_Jour();
-        for (int a = 0; a < nombre_shift; a = a + nombre_shift/8)
-        {
-            for (int b = 0; b < nombre_shift; b = b + nombre_shift/8)
-            {
-                cout << " .";
-                Solution* solutionVoisine = OperateurModificationShiftCodageLineaire(&solutionRealisable, a, b, 0, 1, 0, 1, instance->get_Nombre_Shift());
-                Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance, coeff_Valeur_FO_Contrainte);
-
-                if (solutionVoisine->i_valeur_fonction_objectif >= 0 && solutionVoisine->i_valeur_fonction_objectif < candidat->i_valeur_fonction_objectif)
-                {
-                    candidat = solutionVoisine;
-                }
-                else
-                {
-                    delete solutionVoisine;
+                    for (int jour = 0; jour < nombre_jour; jour++)
+                    {
+                        OperationOperateurSwapCodageLineaire(&solutionRealisable, &p_candidat, &solutionVoisine, instance, coeff_Valeur_FO_Contrainte,
+                            personne, jour, nombre_jour,
+                            OperateurSwapJourCodageLineaire, a, b);
+                    }
                 }
             }
         }
         break;
     }
 
-    if (candidat == &solutionRealisable)
+    if (p_candidat == &solutionRealisable)
     {
         return nullptr;
     }
     else
     {
-        return candidat;
+        return p_candidat;
     }
 }
 
 
-int MetaHeuristique::CodageLineaire(int a, int x, int b, int modulo)
+
+// ################### OPERATIONS ###################
+
+
+// Operation Swap avec Codage Lineaire
+
+void MetaHeuristique::OperationOperateurSwapCodageLineaire(Solution* solutionRealisable, Solution** p_candidat, Solution* solutionVoisine, Instance* instance, float coeff_Valeur_FO_Contrainte,
+    int personne, int jour, int modulo,
+    int* OperateurSwapCodageLineaire(Solution*, int, int, int, int, int), int a, int b)
 {
-    return (a*x + b) % modulo; // BUG : Si x == -1, return peut être < -1
-}
-
-
-Solution* MetaHeuristique::OperateurSwapJourCodageLineaire(Solution* uneSolution, int a, int b)
-{
-    if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() == 0) return nullptr;
-    
-    int nbPersonne = uneSolution->v_v_IdShift_Par_Personne_et_Jour.size();
-    int nbJour = uneSolution->v_v_IdShift_Par_Personne_et_Jour[0].size();
-
-    Solution* unVoisin = new Solution();
-    unVoisin->v_v_IdShift_Par_Personne_et_Jour = vector<vector<int>>(nbPersonne);
-
-    for (int personne = 0; personne < nbPersonne; personne++)
+    if (solutionVoisine->v_v_IdShift_Par_Personne_et_Jour[personne][jour] != -1)
     {
-        unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(nbJour);
-        for (int jour = 0; jour < nbJour; jour++)
+        //cout << " . ";
+        OperateurSwapCodageLineaire(solutionVoisine, modulo, personne, jour, a, b);
+        Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance, coeff_Valeur_FO_Contrainte);
+
+        if (solutionVoisine->i_valeur_fonction_objectif >= 0 && solutionVoisine->i_valeur_fonction_objectif < (*p_candidat)->i_valeur_fonction_objectif)
         {
-            // Swap entre les jours
-            unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][CodageLineaire(a, jour, b, nbJour)] = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
-        }
-    }
-
-    return unVoisin;
-}
-
-
-Solution* MetaHeuristique::OperateurSwapPersonneCodageLineaire(Solution* uneSolution, int a, int b)
-{
-    if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() == 0) return nullptr;
-
-    int nbPersonne = uneSolution->v_v_IdShift_Par_Personne_et_Jour.size();
-    int nbJour = uneSolution->v_v_IdShift_Par_Personne_et_Jour[0].size();
-
-    Solution* unVoisin = new Solution();
-    unVoisin->v_v_IdShift_Par_Personne_et_Jour = vector<vector<int>>(nbPersonne);
-    for (int personne = 0; personne < nbPersonne; personne++)
-    {
-        unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(nbJour);
-    }
-
-    for (int personne = 0; personne < nbPersonne; personne++)
-    {
-        for (int jour = 0; jour < nbJour; jour++)
-        {
-            // Swap entre les personnes
-            unVoisin->v_v_IdShift_Par_Personne_et_Jour[CodageLineaire(a, personne, b, nbPersonne)][jour] = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
-        }
-    }
-
-    return unVoisin;
-}
-
-
-Solution* MetaHeuristique::OperateurModificationShiftCodageLineaire(Solution* uneSolution, int a, int b, int c, int d, int e, int f, int nombreShift)
-{
-    if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() == 0) return nullptr;
-
-    int nbPersonne = uneSolution->v_v_IdShift_Par_Personne_et_Jour.size();
-    int nbJour = uneSolution->v_v_IdShift_Par_Personne_et_Jour[0].size();
-
-    Solution* unVoisin = new Solution();
-    unVoisin->v_v_IdShift_Par_Personne_et_Jour = vector<vector<int>>(nbPersonne);
-
-    for (int personne = c; personne < nbPersonne; personne = personne + d)
-    {
-        unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(nbJour);
-        for (int jour = e; jour < nbJour; jour = jour + f)
-        {
-            // Modifie les shifts
-            int& shift = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
-            if (shift != -1)
+            if (*p_candidat != solutionRealisable)
             {
-                shift = CodageLineaire(a, shift, b, nombreShift);
+                delete *p_candidat;
             }
-        }
-    }
+            *p_candidat = Outils::CopieSolution(solutionVoisine);
 
-    return unVoisin;
+            cout << " ! ";
+            solutionVoisine->Verification_Solution(instance);
+            cout << "Valeur de la fonction objective sans pénalités : " << Outils::i_Calcul_Valeur_Fonction_Objectif(solutionVoisine, instance) << endl;
+            cout << "Valeur de la fonction objectif : " << solutionVoisine->i_valeur_fonction_objectif << endl << endl;
+        }
+        OperateurSwapCodageLineaire(solutionVoisine, modulo, personne, jour, a, b);
+    }
 }
 
 
-Solution* MetaHeuristique::OperateurModificationShiftAleatoire(Solution* uneSolution, Instance* instance, int nombreShift, float proba)
+int* MetaHeuristique::OperateurSwapJourCodageLineaire(Solution* uneSolution, int nombre_jour, int personne, int jour, int a, int b)
 {
-    if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() == 0) return nullptr;
+    int* p_to_swap_shift_personne_jour = &uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
+    int* p_shift_personne_jour = &uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][Outils::CodageLineaire(a, jour, b, nombre_jour)];
+    int temp = *p_to_swap_shift_personne_jour;
 
-    int nbPersonne = uneSolution->v_v_IdShift_Par_Personne_et_Jour.size();
-    int nbJour = uneSolution->v_v_IdShift_Par_Personne_et_Jour[0].size();
+    // Modifie les shifts
+    *p_to_swap_shift_personne_jour = *p_shift_personne_jour;
+    *p_shift_personne_jour = temp;
 
-    Solution* unVoisin = new Solution();
-    unVoisin->v_v_IdShift_Par_Personne_et_Jour = vector<vector<int>>(nbPersonne);
+    return p_shift_personne_jour;
+}
 
-    for (int personne = 0; personne < nbPersonne; personne++)
-    {
-        unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(nbJour);
-        for (int jour = 1; jour < nbJour; jour++)
+
+int* MetaHeuristique::OperateurSwapPersonneCodageLineaire(Solution* uneSolution, int nombre_personne, int personne, int jour, int a, int b)
+{
+    int* p_to_swap_shift_personne_jour = &uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
+    int* p_shift_personne_jour = &uneSolution->v_v_IdShift_Par_Personne_et_Jour[Outils::CodageLineaire(a, personne, b, nombre_personne)][jour];
+    int temp = *p_to_swap_shift_personne_jour;
+
+    // Modifie les shifts
+    *p_to_swap_shift_personne_jour = *p_shift_personne_jour;
+    *p_shift_personne_jour = temp;
+
+    return p_shift_personne_jour;
+}
+
+
+// Operation Modification de Shift avec Codage Lineaire
+
+void MetaHeuristique::OperationOperateurModificationShift(Solution* solutionRealisable, Solution** p_candidat, Solution* solutionVoisine, Instance* instance, float coeff_Valeur_FO_Contrainte,
+    int personne, int jour, int nombre_personne, int nombre_jour, int nombre_shift)
+{
+    if (solutionVoisine->v_v_IdShift_Par_Personne_et_Jour[personne][jour] != -1) {
+        for (int incrShift = 1; incrShift < nombre_shift; incrShift++)
         {
-            if ( ((float) (rand() % 100)) / 100 < proba)
+            cout << " . ";
+            OperateurModificationShift(solutionVoisine, nombre_shift, personne, jour);
+            Heuristique::InitValeurFonctionObjectif(solutionVoisine, instance, coeff_Valeur_FO_Contrainte);
+
+            if (solutionVoisine->i_valeur_fonction_objectif >= 0 && solutionVoisine->i_valeur_fonction_objectif < (*p_candidat)->i_valeur_fonction_objectif)
             {
-                int shift_personne_jour_alea = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
-                // Modifie les shifts
-                if (shift_personne_jour_alea != -1)
+                if (*p_candidat != solutionRealisable)
                 {
-                    unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = rand() % nombreShift;
+                    delete *p_candidat;
                 }
-                else
-                {
-                    unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = -1;
-                }
+                *p_candidat = Outils::CopieSolution(solutionVoisine);
+
+                cout << " ! ";
+                solutionVoisine->Verification_Solution(instance);
+                cout << "Valeur de la fonction objective sans pénalités : " << Outils::i_Calcul_Valeur_Fonction_Objectif(solutionVoisine, instance) << endl;
+                cout << "Valeur de la fonction objectif : " << solutionVoisine->i_valeur_fonction_objectif << endl << endl;
             }
-            else
-            {
-                unVoisin->v_v_IdShift_Par_Personne_et_Jour[personne][jour] = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
-            }
+            OperateurModificationShift(solutionVoisine, nombre_shift, personne, jour, true);
         }
     }
+}
 
-    return unVoisin;
+
+void MetaHeuristique::OperateurModificationShift(Solution* uneSolution, int nombre_shift, int personne, int jour, bool inverse)
+{
+    int& shift_personne_jour = uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
+
+    // Modifie les shifts
+    shift_personne_jour = Outils::CodageLineaire(1, shift_personne_jour, (int)inverse*(-2) + 1, nombre_shift);
 }

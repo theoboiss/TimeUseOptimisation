@@ -99,7 +99,7 @@ int Resolution(Instance* instance)
     //printSolution(solutionInitiale);
     i_val_Retour_Fct_obj = solutionInitiale->i_valeur_fonction_objectif;
     solutionInitiale->Verification_Solution(instance);
-    cout << "Valeur de la fonction objective sans pénalités : " << Heuristique::i_Calcul_Valeur_Fonction_Objectif(solutionInitiale, instance) << endl;
+    cout << "Valeur de la fonction objective sans pénalités : " << Outils::i_Calcul_Valeur_Fonction_Objectif(solutionInitiale, instance) << endl;
     cout << "Valeur de la fonction objectif : " << solutionInitiale->i_valeur_fonction_objectif << endl << endl;
 
     
@@ -109,7 +109,7 @@ int Resolution(Instance* instance)
         //printSolution(meilleureSolutionTrouvee);
         i_val_Retour_Fct_obj = meilleureSolutionTrouvee->i_valeur_fonction_objectif;
         meilleureSolutionTrouvee->Verification_Solution(instance);
-        cout << "Valeur de la fonction objective sans pénalités : " << Heuristique::i_Calcul_Valeur_Fonction_Objectif(meilleureSolutionTrouvee, instance) << endl;
+        cout << "Valeur de la fonction objective sans pénalités : " << Outils::i_Calcul_Valeur_Fonction_Objectif(meilleureSolutionTrouvee, instance) << endl;
         cout << "Valeur de la fonction objectif : " << meilleureSolutionTrouvee->i_valeur_fonction_objectif << endl << endl;
         delete meilleureSolutionTrouvee;
     }

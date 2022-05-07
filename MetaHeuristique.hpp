@@ -4,9 +4,11 @@
 #include <vector>
 #include <list>
 #include <algorithm>
+#include <functional>
 #include "Instance.hpp"
 #include "Solution.hpp"
 #include "Heuristique.hpp"
+#include "Outils.hpp"
 
 using namespace std;
 
@@ -19,17 +21,17 @@ public:
 
 	static Solution* RechercheVoisinageVariable(Solution solutionRealisable, Instance* instance, int k, float coeff_Valeur_FO_Contrainte);
 
-	static int CodageLineaire(int a, int x, int b, int modulo);
+	static void OperationOperateurModificationShift(Solution* solutionRealisable, Solution** candidat, Solution* solutionVoisine, Instance* instance, float coeff_Valeur_FO_Contrainte, int personne, int jour, int nombre_personne = 0, int nombre_jour = 0, int nombre_shift = 0);
 
-	static Solution* OperateurSwapJourCodageLineaire(Solution* uneSolution, int a, int b);
+	static void OperateurModificationShift(Solution* uneSolution, int nombre_shift, int personne, int jour, bool inverse = false);
 
-	static Solution* OperateurSwapPersonneCodageLineaire(Solution* uneSolution, int a, int b);
+	static void OperationOperateurSwapCodageLineaire(Solution* solutionRealisable, Solution** candidat, Solution* solutionVoisine, Instance* instance, float coeff_Valeur_FO_Contrainte,
+		int personne, int jour, int modulo,
+		int* OperateurSwapCodageLineaire(Solution*, int, int, int, int, int), int a, int b);
 
-	static Solution* OperateurModificationShiftCodageLineaire(Solution* uneSolution, int a, int b, int c, int d, int e, int f, int nombreShift);
+	static int* OperateurSwapJourCodageLineaire(Solution* uneSolution, int nombre_jour, int personne, int jour, int a, int b);
 
-	static Solution* OperateurModificationShiftAleatoire(Solution* uneSolution, Instance* instance, int nombreShift, float proba);
-
-	static Solution* CopieSolution(Solution* uneSolution);
+	static int* OperateurSwapPersonneCodageLineaire(Solution* uneSolution, int nombre_personne, int personne, int jour, int a, int b);
 
 };
 
