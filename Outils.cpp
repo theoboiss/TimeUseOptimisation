@@ -146,6 +146,7 @@ int Outils::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Insta
                         }
                         if (b_test_si_premier_jour_off)
                         {
+                            poids += instance->get_Personne_Jour_OFF_Consecutif_Min(i) - jj;
                             nombre_contraintes_non_respectees++;
                         }
                     }
@@ -201,6 +202,31 @@ int Outils::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Insta
 }
 
 
+list<int> Outils::Personne_Contraintes_Non_Respectes(Solution* uneSolution, Instance* instance)
+{
+    list<int> personnes_problematiques;
+
+    for (int personne = 0; personne < uneSolution->v_v_IdShift_Par_Personne_et_Jour.size(); personne++)
+    {
+        int i_duree_travail = 0;
+        for (int jour = 0; jour < uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne].size(); jour++)
+        {
+            if (uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour] != -1)
+            {
+                i_duree_travail = i_duree_travail + instance->get_Shift_Duree(uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour]);
+            }
+        }
+
+        //Vérification de la durée totale maximale et minimale de chaque personne
+        if ((i_duree_travail > instance->get_Personne_Duree_total_Max(personne)) || (i_duree_travail < instance->get_Personne_Duree_total_Min(personne)))
+        {
+            personnes_problematiques.push_back(personne);
+        }
+    }
+    return personnes_problematiques;
+}
+
+
 Solution* Outils::CopieSolution(Solution* uneSolution)
 {
     if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() == 0) return nullptr;
@@ -224,26 +250,21 @@ Solution* Outils::CopieSolution(Solution* uneSolution)
 }
 
 
-list<int> Outils::Personne_Contraintes_Non_Respectes(Solution* uneSolution, Instance* instance)
+void Outils::printSolution(Solution* uneSolution)
 {
-    list<int> personnes_problematiques;
-
     for (int personne = 0; personne < uneSolution->v_v_IdShift_Par_Personne_et_Jour.size(); personne++)
     {
-        int i_duree_travail = 0;
-        for (int jour = 0; jour < uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne].size(); jour++)
+        for (int jour = 1; jour < uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne].size(); jour++) // On parcourt les jours à partir du deuxième
         {
-            if (uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour] != -1)
-            {
-                i_duree_travail = i_duree_travail + instance->get_Shift_Duree(uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour]);
-            }
+            cout << uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour] << '\t';
         }
-
-        //Vérification de la durée totale maximale et minimale de chaque personne
-        if ((i_duree_travail > instance->get_Personne_Duree_total_Max(personne)) || (i_duree_travail < instance->get_Personne_Duree_total_Min(personne)))
-        {
-            personnes_problematiques.push_back(personne);
-        }
+        cout << endl;
     }
-    return personnes_problematiques;
+}
+
+
+int Outils::getSecondesEcoulees(chrono::time_point<chrono::system_clock> chrono_start)
+{
+    chrono::duration<double> elapsed = chrono::system_clock::now() - chrono_start;
+    return elapsed.count();
 }

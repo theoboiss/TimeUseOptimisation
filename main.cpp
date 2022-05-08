@@ -89,9 +89,11 @@ int main(int argc, const char* argv[])
 
 int Resolution(Instance* instance)
 {
+    chrono::time_point<chrono::system_clock> chrono_start = chrono::system_clock::now();
+
     int i_val_Retour_Fct_obj = 0;
     Solution* solutionInitiale = new Solution();
-    float coeff_Valeur_FO_Contrainte = 0.1;
+    float coeff_Valeur_FO_Contrainte = 0.25;
 
     solutionInitiale = Heuristique::GenerationSolutionRealisable(instance);
     Heuristique::InitValeurFonctionObjectif(solutionInitiale, instance, coeff_Valeur_FO_Contrainte);
@@ -102,8 +104,8 @@ int Resolution(Instance* instance)
     cout << "Valeur de la fonction objective sans pénalités : " << Outils::i_Calcul_Valeur_Fonction_Objectif(solutionInitiale, instance) << endl;
     cout << "Valeur de la fonction objectif : " << solutionInitiale->i_valeur_fonction_objectif << endl << endl;
 
-    
-    Solution* meilleureSolutionTrouvee = MetaHeuristique::MeilleureSolution(*solutionInitiale, instance, coeff_Valeur_FO_Contrainte); // Valeur de la FO initialisé dedans
+
+    Solution* meilleureSolutionTrouvee = MetaHeuristique::MeilleureSolution(*solutionInitiale, instance, coeff_Valeur_FO_Contrainte, chrono_start); // Valeur de la FO initialisé dedans
     if (meilleureSolutionTrouvee)
     {
         //printSolution(meilleureSolutionTrouvee);
@@ -119,16 +121,4 @@ int Resolution(Instance* instance)
     }
     delete solutionInitiale;
     return i_val_Retour_Fct_obj;
-}
-
-void printSolution(Solution* uneSolution)
-{
-    for (int personne = 0; personne < uneSolution->v_v_IdShift_Par_Personne_et_Jour.size(); personne++)
-    {
-        for (int jour = 1; jour < uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne].size(); jour++) // On parcourt les jours à partir du deuxième
-        {
-            cout << uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour] << '\t';
-        }
-        cout << endl;
-    }
 }

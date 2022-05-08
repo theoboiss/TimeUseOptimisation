@@ -22,9 +22,13 @@ public:
 
 	static int i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Instance* instance, float coeff_Valeur_FO_Contrainte);
 
+	static list<int> Personne_Contraintes_Non_Respectes(Solution* uneSolution, Instance* instance);
+
 	static Solution* CopieSolution(Solution* uneSolution);
 
-	static list<int> Personne_Contraintes_Non_Respectes(Solution* uneSolution, Instance* instance);
+	static void printSolution(Solution* uneSolution);
+
+	static int getSecondesEcoulees(chrono::time_point<chrono::system_clock> chrono_start);
 	
 };
 
