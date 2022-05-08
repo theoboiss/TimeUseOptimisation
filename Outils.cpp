@@ -202,9 +202,9 @@ int Outils::Calcul_Penalisation_Valeur_FO(Solution* uneSolution, Instance* insta
 }
 
 
-list<int> Outils::Personnes_Contraintes_Non_Respectes(Solution* uneSolution, Instance* instance)
+deque<int> Outils::Personnes_Contraintes_Non_Respectes(Solution* uneSolution, Instance* instance)
 {
-    list<int> personnes_problematiques;
+    deque<int> personnes_problematiques;
 
     for (int personne = 0; personne < uneSolution->v_v_IdShift_Par_Personne_et_Jour.size(); personne++)
     {

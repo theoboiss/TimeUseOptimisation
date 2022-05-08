@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <list>
 #include "Instance.hpp"
 #include "Solution.hpp"
 #include "Outils.hpp"

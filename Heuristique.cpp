@@ -1,4 +1,4 @@
-#include "Heuristique.hpp"
+Ôªø#include "Heuristique.hpp"
 
 #define DEBUG false
 
@@ -12,7 +12,7 @@ void Heuristique::Init_Valeur_FO_Indicative(Solution* uneSolution, Instance* ins
     uneSolution->i_valeur_fonction_objectif = Outils::Calcul_Valeur_FO(uneSolution, instance);
 
     uneSolution->i_valeur_fonction_objectif += Outils::Calcul_Penalisation_Valeur_FO(uneSolution, instance, coeff_Valeur_FO_Contrainte);
-    //uneSolution->i_valeur_fonction_objectif = log10(uneSolution->i_valeur_fonction_objectif) + Heuristique::i_Calcul_Penalisation_Fonction_Objectif(uneSolution, instance, coeff_Valeur_FO_Contrainte);
+
 }
 
 
@@ -20,72 +20,70 @@ void Heuristique::Init_Valeur_FO_Indicative(Solution* uneSolution, Instance* ins
 // ################### CREATION DE LA SOLUTION INITIALE ###################
 
 
-bool Heuristique::is_Jour_OFF_Proche_WE(Instance* instance, int jour_OFF, int i_Nbre_Jour_OFF_Consecutif_Min, int i_Nbre_Shift_Consecutif_Min)
-{
-    for (int jour_Travail_Apres_Jour_OFF = jour_OFF + i_Nbre_Jour_OFF_Consecutif_Min; jour_Travail_Apres_Jour_OFF < jour_OFF + i_Nbre_Jour_OFF_Consecutif_Min + i_Nbre_Shift_Consecutif_Min; jour_Travail_Apres_Jour_OFF++)
-    {
-        if (jour_Travail_Apres_Jour_OFF % 7 >= 5)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
 
 Solution* Heuristique::Generation_Solution_Initiale(Instance* instance) {
-    // Initialisation
+
+    //-----------------------------------------Initialisation-------------------------------------------------------------
 
     Solution* S = new Solution();
 
-    /*
-    * Pour chaque personne, on Ètablit la liste des WE rÈservÈs (/jours de congÈs trop proches des WE (aprËs le congÈ, reprendre le travail nous obligera ‡ travailler le WE)),
-    * et on vÈrifie avant de travailler un WE si un jour de congÈ problÈmatique Èxiste dans la semaine courante.
-    * Si le nombre de WE rÈservÈs (/semaines contenant un jour problÈmatique) est supÈrieur
-    * Si oui, on favorise le travail ce WE.
-    * Si non, on Èvite de travailler ce WE.
-    *
-    * Personne 29, semaine 4 (avec i_Nbre_Shift_Consecutif_Min = 2 et i_Nbre_Jour_OFF_Consecutif_Min = 2) :
-    * Lundi, Mardi, Mercredi CONGE, Jeudi, Vendredi, Samedi, Dimanche
-    *   T      T            X         X        X        X       ...
-    *                       |---------> (i_Nbre_Jour_OFF_Consecutif_Min)
-    *                                 ~~~~~~~~~|--------> (i_Nbre_Shift_Consecutif_Min)
-    *                                                   WE      donc mercredi est un jour OFF proche du WE (problÈmatique)
-    *          |------------>
-    *                       ~~~~~~~~~~|-------->
-    *                                          PAS WE donc mardi (si c'Ètait un jour de congÈ) n'est pas problÈmatique
-    *
-    *                                          |-------->
-    *                                                   ~~~~~~~~~|---------->
-    *                                                            WE     donc vendredi (si c'Ètait un jour de congÈ) est problÈmatique
-    */
     vector<list<int>> v_l_Jour_OFF_Proche_WE(instance->get_Nombre_Personne());
+    /*
+     * Pour chaque personne, on √©tablit la liste des WE r√©serv√©s (/jours de cong√©s trop proches des WE (apr√®s le cong√©, reprendre le travail nous obligera √† travailler le WE)),
+     * et on v√©rifie avant de travailler un WE si un jour de cong√© probl√©matique √©xiste dans la semaine courante.
+     * Si le nombre de WE r√©serv√©s (/semaines contenant un jour probl√©matique) est sup√©rieur
+     *Si oui, on favorise le travail ce WE.
+     * Si non, on √©vite de travailler ce WE.
+     */
     for (int personne = 0; personne < instance->get_Nombre_Personne(); personne++)
     {
         v_l_Jour_OFF_Proche_WE.at(personne) = list<int>();
+
         vector<int> personne_Id_Jour_Conges = instance->get_vector_Personne_Id_Jour_Conges(personne);
 
-        for (int it = 0; it < personne_Id_Jour_Conges.size(); it++) // Pour chaque jour de congÈ
+        for (int it = 0; it < personne_Id_Jour_Conges.size(); it++) // Pour chaque jour de cong√©
         {
             if (is_Jour_OFF_Proche_WE(instance, personne_Id_Jour_Conges.at(it), instance->get_Personne_Jour_OFF_Consecutif_Min(personne), instance->get_Personne_Nbre_Shift_Consecutif_Min(personne))) // S'il est proche du WE
             {
                 int numero_Semaine_Jour_OFF_Proche_WE = personne_Id_Jour_Conges.at(it) / 7;
-                v_l_Jour_OFF_Proche_WE.at(personne).push_back(numero_Semaine_Jour_OFF_Proche_WE); // On stocke son numÈro de semaine pour la personne
+
+                v_l_Jour_OFF_Proche_WE.at(personne).push_back(numero_Semaine_Jour_OFF_Proche_WE); // On stocke son num√©ro de semaine pour la personne
             }
         }
+        //Ce vecteur de liste contient pour chaque personne la liste contenant les WE o√π la personne va travailler en priorit√©
         v_l_Jour_OFF_Proche_WE.at(personne).unique();
     }
+    //Initialisation des diff√©rents compteurs utilis√©s dans l'heuristique
 
     vector<int> v_Duree_Min_Shift_Consecutif_Personne(instance->get_Nombre_Personne());
+    //Vecteur de taille instance->get_Nombre_Personne() qui contient une bonne estimation de la dur√©e minimum des suites de shifts de taille instance->get_Personne_Nbre_Shift_Consecutif_Min(personne).
+
     vector<int> v_Nbre_Shift_Consecutif(instance->get_Nombre_Personne());
+    //Vecteur de taille instance->get_Nombre_Personne() dont la case [personne] contient le compteur des shifts cons√©cutifs lors de son appel dans l'heuristique.
+
     vector<int> v_Nbre_Jour_OFF_Consecutif(instance->get_Nombre_Personne());
+    //Vecteur de taille instance->get_Nombre_Personne() dont la case [personne] contient le compteur des jours de repos cons√©cutifs lors de son appel dans l'heuristique.
+
+
     vector<int> v_Nbre_WE_Travaille(instance->get_Nombre_Personne());
+    //Vecteur de taille instance->get_Nombre_Personne() dont la case [personne] contient le compteur des WE o√π la personne √† travaill√© lors de son appel dans l'heuristique.
+
+
     vector<int> v_Duree_Totale_Shift_Personne(instance->get_Nombre_Personne());
+    //Vecteur de taille instance->get_Nombre_Personne() dont la case [personne] contient le compteur du temps total de travaille lors de son appel dans l'heuristique.
+
+
     vector<vector<int>> v_v_Nbre_Chaque_Shift_Pers(instance->get_Nombre_Personne());
+    //Vecteur de taille instance->get_Nombre_Personne() dont la case [personne][shift] contient le compteur de shift effectu√© par la personne lors de son appel dans l'heuristique.
+
+
+    //--------------Tri des shifts par dur√©e------------------------------------
 
     vector<pair<int, int>> v_v_Shift_trie;
 
+
     int duree_shift_min = instance->get_Shift_Duree(0);
+
     for (int shift = 0; shift < instance->get_Nombre_Shift(); shift++)
     {
         int duree_shift = instance->get_Shift_Duree(shift);
@@ -99,28 +97,42 @@ Solution* Heuristique::Generation_Solution_Initiale(Instance* instance) {
     }
     sort(v_v_Shift_trie.begin(), v_v_Shift_trie.end(), Outils::Comparer);
 
-    //------Cas du premier jour------
+    //-----------------Cas du premier jour------------------------
+
 
     S->v_v_IdShift_Par_Personne_et_Jour = vector<vector<int>>(instance->get_Nombre_Personne());
+
+    //On parcourt les personnes
     for (int personne = 0; personne < instance->get_Nombre_Personne(); personne++)
     {
+        //On initialise les le tableau de solutions avec des colonnes de -1
         S->v_v_IdShift_Par_Personne_et_Jour[personne] = vector<int>(instance->get_Nombre_Jour(), -1);
+
+        //On initialise les diff√©rents compteurs
         v_v_Nbre_Chaque_Shift_Pers[personne] = vector<int>(instance->get_Nombre_Shift(), 0);
+
         v_Duree_Min_Shift_Consecutif_Personne.at(personne) = Duree_Minimum_Combinaison_Shift_Possible(instance, personne);
+
         int shift = -1;
 
         if (instance->is_Available_Personne_Jour(personne, 0) && is_Peut_Reprendre_Travail(instance, v_l_Jour_OFF_Proche_WE.at(personne), personne, 0, 0, v_Duree_Totale_Shift_Personne.at(0), v_Duree_Min_Shift_Consecutif_Personne.at(personne)))
+            // On v√©rifie que la personne n'est pas en cong√© pour le 1er jour o√π pour les jours proches suivants pour qu'elle puisse commencer √† travailler
         {
             int meilleur_candidat = -1;
+
             int plus_long_Duree_Shift = 0;
+
+            //On parcourt les candidats
             for (int candidat = 0; candidat < instance->get_Nombre_Shift(); candidat++)
             {
                 if (instance->get_Personne_Shift_Nbre_Max(personne, candidat) > 0) // La personne peut travailler sur ce shift
                 {
                     int candidat_Shift_Duree = instance->get_Shift_Duree(candidat);
-                    if (candidat_Shift_Duree > plus_long_Duree_Shift) // A REVOIR
+
+                    if (candidat_Shift_Duree > plus_long_Duree_Shift) //Pour le premier jour on se permet d'attribuer √† la personne le shift de plus grande dur√©e qu'elle peut r√©aliser.
                     {
                         meilleur_candidat = candidat;
+
                         plus_long_Duree_Shift = candidat_Shift_Duree;
                     }
                 }
@@ -132,32 +144,37 @@ Solution* Heuristique::Generation_Solution_Initiale(Instance* instance) {
 
         if (shift != -1)
         {
-            v_Nbre_Shift_Consecutif.at(personne) = 1; //Initialisation du compteur des shifts consecutifs et des jours OFF consÈcutifs
+            v_Nbre_Shift_Consecutif.at(personne) = 1; //Initialisation des diff√©rents compteurs lorsque la personne ne travaille pas
             v_Nbre_Jour_OFF_Consecutif.at(personne) = 0;
             v_Duree_Totale_Shift_Personne.at(personne) = instance->get_Shift_Duree(shift);
             v_v_Nbre_Chaque_Shift_Pers.at(personne).at(shift) += 1;
         }
         else
         {
-            v_Nbre_Shift_Consecutif.at(personne) = 0; //Initialisation du compteur des shifts consecutifs et des jours OFF consÈcutifs
+            v_Nbre_Shift_Consecutif.at(personne) = 0; //Initialisation des diff√©rents compteurs lorsque la personne travaille
             v_Nbre_Jour_OFF_Consecutif.at(personne) = 1;
             v_Duree_Totale_Shift_Personne.at(personne) = 0;
         }
     }
 
 
-    //------Cas gÈnÈral------
+    //-----------------------Cas g√©n√©ral----------------------------
 
+    //On parcourt les personnes
     for (int personne = 0; personne < instance->get_Nombre_Personne(); personne++)
     {
         if (DEBUG) cout << "personne " << personne << " ";
-        for (int jour = 1; jour < instance->get_Nombre_Jour(); jour++) //On parcourt les jours ‡ partir du deuxiËme
+
+        //On parcourt les jours √† partir du deuxi√®me
+        for (int jour = 1; jour < instance->get_Nombre_Jour(); jour++)
         {
             if (DEBUG) cout << "jour " << jour << " ";
+
             int semaine = jour / 7;
+
             int shift = -1; //Initialisation du shift pour une personne et pour un jour
 
-            // Si la durÈe totale des shifts de la personne avec le plus petit nouveau shift possible ne dÈpasse pas la durÈe maximale
+            // Si la dur√©e totale des shifts de la personne avec le plus petit nouveau shift possible ne d√©passe pas la dur√©e maximale
             if (v_Duree_Totale_Shift_Personne.at(personne) + duree_shift_min <= instance->get_Personne_Duree_total_Max(personne))
             {
                 // Si la personne ne travaille pas trop de fois de suite
@@ -167,34 +184,38 @@ Solution* Heuristique::Generation_Solution_Initiale(Instance* instance) {
                     if ((jour % 7 >= 5) && is_Peut_Travailler_WE_Semaine(v_l_Jour_OFF_Proche_WE.at(personne), v_Nbre_WE_Travaille.at(personne), instance->get_Personne_Nbre_WE_Max(personne), semaine)
                         || (jour % 7 < 5))
                     {
-                        // Si la personne n'est pas en congÈ ce jour l‡
+                        // Si la personne n'est pas en cong√© ce jour l√†
                         if (instance->is_Available_Personne_Jour(personne, jour))
                         {
                             if ((v_Nbre_Jour_OFF_Consecutif.at(personne) == 0) // Si la personne travaille depuis au moins le jour d'avant
                                 || (v_Nbre_Jour_OFF_Consecutif.at(personne) >= instance->get_Personne_Jour_OFF_Consecutif_Min(personne) // Si la personne a eu assez de repos et peut reprendre son travail
-                                     //&& v_Duree_Totale_Shift_Personne.at(personne) < instance->get_Personne_Duree_total_Min(personne)
-                                    && is_Peut_Reprendre_Travail(instance, v_l_Jour_OFF_Proche_WE.at(personne), personne, jour, v_Nbre_WE_Travaille.at(personne), v_Duree_Totale_Shift_Personne.at(personne), v_Duree_Min_Shift_Consecutif_Personne.at(personne)))) // Et que la personne pourra travailler au moins le nombre consÈcutif minimum de quart d'heure de travail.
+                                    && is_Peut_Reprendre_Travail(instance, v_l_Jour_OFF_Proche_WE.at(personne), personne, jour, v_Nbre_WE_Travaille.at(personne), v_Duree_Totale_Shift_Personne.at(personne), v_Duree_Min_Shift_Consecutif_Personne.at(personne))))
+                                // Et que la personne pourra travailler au moins le nombre cons√©cutif minimum de quart d'heure de travail.
                             {
                                 // Choix d'un shift
                                 bool is_chosen_shift = false;
-                                for (int candidat = 0; (candidat < instance->get_Nombre_Shift()) && (!is_chosen_shift); candidat++) //les id shift correspondent ‡ candidat
+
+                                for (int candidat = 0; (candidat < instance->get_Nombre_Shift()) && (!is_chosen_shift); candidat++) //les id shift correspondent √† candidat
                                 {
-                                    // Si la durÈe totale des shifts de la personne avec le candidat ne dÈpasse pas la durÈe maximale
+                                    // Si la dur√©e totale des shifts de la personne avec le candidat ne d√©passe pas la dur√©e maximale
                                     if (v_Duree_Totale_Shift_Personne.at(personne) + instance->get_Shift_Duree(candidat) <= instance->get_Personne_Duree_total_Max(personne))
                                     {
-                                        if (S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour - 1) == -1) // Si le jour prÈcÈdent Ètait un jour repos
+                                        if (S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour - 1) == -1) // Si le jour pr√©c√©dent √©tait en jour repos
                                         {
                                             if (v_v_Nbre_Chaque_Shift_Pers.at(personne).at(candidat) < instance->get_Personne_Shift_Nbre_Max(personne, candidat))
                                             {
+                                                //pour le choix des shifts dans le cas g√©n√©ral, on ne s'emb√™te pas √† les optimiser, on prend le premier shift qui r√©pond aux diff√©rentes contraintes
                                                 shift = candidat;
+
                                                 is_chosen_shift = true;
                                             }
                                         }
-                                        else if (instance->is_possible_Shift_Succede(S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour - 1), candidat)) // Sinon, on vÈrifie que le candidat peut succÈder au jour de travail prÈcÈdent
+                                        else if (instance->is_possible_Shift_Succede(S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour - 1), candidat)) // Sinon, on v√©rifie que le candidat peut succ√©der au jour de travail pr√©c√©dent
                                         {
                                             if (v_v_Nbre_Chaque_Shift_Pers.at(personne).at(candidat) < instance->get_Personne_Shift_Nbre_Max(personne, candidat))
                                             {
                                                 shift = candidat;
+
                                                 is_chosen_shift = true;
                                             }
                                         }
@@ -206,30 +227,42 @@ Solution* Heuristique::Generation_Solution_Initiale(Instance* instance) {
                     }
                 }
             }
+            //On effectue l'attibution du shift r√©pondant aux diff√©rentes contraintes
+            S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour) = shift;
 
-            S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour) = shift; // A VERIFIER
             if (shift != -1)
             {
+                //Mise √† jour des diff√©rents compteurs quand la personne est de travaille
+
                 v_Nbre_Shift_Consecutif.at(personne) += 1;
+
                 v_Nbre_Jour_OFF_Consecutif.at(personne) = 0;
+
                 v_Duree_Totale_Shift_Personne.at(personne) += instance->get_Shift_Duree(shift);
+
                 v_v_Nbre_Chaque_Shift_Pers.at(personne).at(shift) += 1;
-                if (jour % 7 == 6)	// Que ce jour l‡ est dimanche (Èquivalent ‡ : on a travaillÈ que le dimanche ou tout le WK)
+
+                if (jour % 7 == 6)	// Que ce jour l√† est dimanche (√©quivalent √† : on a travaill√© que le dimanche ou tout le WK)
                 {
                     v_Nbre_WE_Travaille.at(personne) += 1;
                 }
             }
             else
             {
+                //Mise √† jour des diff√©rents compteurs quand la personne est de repos
+
                 v_Nbre_Shift_Consecutif.at(personne) = 0;
+
                 v_Nbre_Jour_OFF_Consecutif.at(personne) += 1;
-                if ((jour % 7 == 6) && ((S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour - 1) != -1)))	// Que ce jour l‡ est dimanche (Èquivalent ‡ : on a travaillÈ que le dimanche ou tout le WK)
+
+                if ((jour % 7 == 6) && ((S->v_v_IdShift_Par_Personne_et_Jour.at(personne).at(jour - 1) != -1)))	// Que ce jour l√† est dimanche, mais qu'on √† travailler le samedi de la veille
                 {
                     v_Nbre_WE_Travaille.at(personne) += 1;
                 }
             }
 
             if (!v_l_Jour_OFF_Proche_WE.at(personne).empty() && jour % 7 == 6 && v_l_Jour_OFF_Proche_WE.at(personne).front() == semaine)
+                //Si la personne a travaill√© durant un WE qui se trouve sur la liste des WE prioritaire de travaille, on met √† jour sa liste.
             {
                 v_l_Jour_OFF_Proche_WE.at(personne).pop_front();
             }
@@ -247,21 +280,20 @@ Solution* Heuristique::Generation_Solution_Initiale(Instance* instance) {
 bool Heuristique::is_Peut_Travailler_WE_Semaine(list<int>& l_Jour_OFF_Proche_WE_Personne, int nbre_WE_Travaille_Personne, int nbre_WE_Max_Personne, int semaine)
 {
     return ((nbre_WE_Travaille_Personne + l_Jour_OFF_Proche_WE_Personne.size() < nbre_WE_Max_Personne) // S'il reste encore des WE sur lesquels on peut travailler
-        || ((nbre_WE_Travaille_Personne + l_Jour_OFF_Proche_WE_Personne.size() == nbre_WE_Max_Personne) // Ou s'il ne reste que des WE rÈservÈs
-            && (!l_Jour_OFF_Proche_WE_Personne.empty() && l_Jour_OFF_Proche_WE_Personne.front() == semaine))); // Et que le WE de cette semaine est rÈservÈ
+        || ((nbre_WE_Travaille_Personne + l_Jour_OFF_Proche_WE_Personne.size() == nbre_WE_Max_Personne) // Ou s'il ne reste que des WE r√©serv√©s
+            && (!l_Jour_OFF_Proche_WE_Personne.empty() && l_Jour_OFF_Proche_WE_Personne.front() == semaine))); // Et que le WE de cette semaine est r√©serv√©
 }
 
 
 bool Heuristique::is_Peut_Reprendre_Travail(Instance* instance, list<int>& l_Jour_OFF_Proche_WE_Personne, int personne, int jour, int Nbre_WE_Travaille_Personne, int duree_totale_shift_personne, int duree_Min_Shift_Consecutif_Personne)
 {
     // Pour chaque jour suivants sur lesquels la personne devra travailler ensuite
-    for (int i = jour; (i < jour + instance->get_Personne_Nbre_Shift_Consecutif_Min(personne)) && (i < instance->get_Nombre_Jour()); i++)  //On vÈrifie que la personne est disponible sur le nombre de jours consÈcutifs suivants minimum
+    for (int i = jour; (i < jour + instance->get_Personne_Nbre_Shift_Consecutif_Min(personne)) && (i < instance->get_Nombre_Jour()); i++)  //On v√©rifie que la personne est disponible sur le nombre de jours cons√©cutifs suivants minimum
     {
-        if ((!instance->is_Available_Personne_Jour(personne, i)) // Si la personnne est en congÈ ce jour l‡
+        if ((!instance->is_Available_Personne_Jour(personne, i)) // Si la personnne est en cong√© ce jour l√†
             || ((i % 7 >= 5) // Ou que c'est le weekend
-                && (!is_Peut_Travailler_WE_Semaine(l_Jour_OFF_Proche_WE_Personne, Nbre_WE_Travaille_Personne, instance->get_Personne_Nbre_WE_Max(personne), i / 7))) // Et qu'elle s'apprÍte ‡ travailler trop de weekends
-                  //Nbre_WE_Travaille_Personne >= instance->get_Personne_Nbre_WE_Max(personne) ) // Et qu'elle s'apprÍte ‡ travailler trop de weekends
-            || (duree_totale_shift_personne + duree_Min_Shift_Consecutif_Personne > instance->get_Personne_Duree_total_Max(personne))) // Ou la personne ne dÈpassera pas sa durÈe maximale de travail
+                && (!is_Peut_Travailler_WE_Semaine(l_Jour_OFF_Proche_WE_Personne, Nbre_WE_Travaille_Personne, instance->get_Personne_Nbre_WE_Max(personne), i / 7))) // Et qu'elle s'appr√™te √† travailler trop de weekends
+            || (duree_totale_shift_personne + duree_Min_Shift_Consecutif_Personne > instance->get_Personne_Duree_total_Max(personne))) // Ou la personne ne d√©passera pas sa dur√©e maximale de travail
         {
             return false;
         }
@@ -270,12 +302,17 @@ bool Heuristique::is_Peut_Reprendre_Travail(Instance* instance, list<int>& l_Jou
 }
 
 
-int Heuristique::Duree_Minimum_Combinaison_Shift_Possible(Instance* instance, int personne) {
+int Heuristique::Duree_Minimum_Combinaison_Shift_Possible(Instance* instance, int personne)
+{
     int nb_shift_consecutif_min = instance->get_Personne_Nbre_Shift_Consecutif_Min(personne);
+
     vector<int> combinaison_shift(nb_shift_consecutif_min);
+
     bool est_initialise = false;
+
     int shift = 0;
 
+    //On initialise le premier jour de la combinaison de shift de dur√©e minimum on prenant un shift de dur√©e minimum compatible avec la personne
     while (!est_initialise)
     {
         if (instance->get_Personne_Shift_Nbre_Max(personne, shift) > 0)
@@ -287,25 +324,48 @@ int Heuristique::Duree_Minimum_Combinaison_Shift_Possible(Instance* instance, in
     }
 
     int duree_Totale_Combinaison_Shift = duree_Totale_Combinaison_Shift = instance->get_Shift_Duree(combinaison_shift[0]);
+
+    //On finit d'initialiser les autres jours de la combinaison de shift minimu de la personne
     for (int i = 1; i < nb_shift_consecutif_min; i++)
     {
         bool est_Choisi_Shift_Combinaison = false;
+
+        //On parcourt tout les shifts par ordre de dur√©e en s'assurant d'en choisir un qui peut succ√©der au pr√©c√©dent 
         for (shift = 0; shift < instance->get_Nombre_Shift() && !est_Choisi_Shift_Combinaison; shift++)
         {
             if (instance->get_Personne_Shift_Nbre_Max(personne, shift) > 0
                 && instance->is_possible_Shift_Succede(combinaison_shift[i - 1], shift))
             {
                 combinaison_shift.at(i) = shift;
+
                 est_Choisi_Shift_Combinaison = true;
             }
         }
         if (!est_Choisi_Shift_Combinaison)
         {
+            //Le cas o√π la combinaison de shift minimum n'existerait pas, qui serait possible uniquement s'il existe un shift dont aucun autre ne pourrait succ√©der
             cout << "Erreur dans Duree_Minimum_Combinaison_Shift_Possible : Combinaison minimum impossible" << endl;
+
             break;
         }
+        //On calcule la dur√©e total de la combinaison de shift construite
         duree_Totale_Combinaison_Shift += instance->get_Shift_Duree(combinaison_shift[i]);
     }
 
     return duree_Totale_Combinaison_Shift;
 }
+
+
+
+bool Heuristique::is_Jour_OFF_Proche_WE(Instance* instance, int jour_OFF, int i_Nbre_Jour_OFF_Consecutif_Min, int i_Nbre_Shift_Consecutif_Min)
+{
+    for (int jour_Travail_Apres_Jour_OFF = jour_OFF + i_Nbre_Jour_OFF_Consecutif_Min; jour_Travail_Apres_Jour_OFF < jour_OFF + i_Nbre_Jour_OFF_Consecutif_Min + i_Nbre_Shift_Consecutif_Min; jour_Travail_Apres_Jour_OFF++)
+    {
+        if (jour_Travail_Apres_Jour_OFF % 7 >= 5)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+

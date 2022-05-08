@@ -1,6 +1,6 @@
 #include <iostream>
 #include <chrono>
-#include <list>
+#include <deque>
 #include "Instance.hpp"
 #include "Solution.hpp"
 
@@ -16,7 +16,7 @@ public:
 	/// </summary>
 	/// 
 	/// <param name="chrono_start"></param>
-	/// <returns></returns>
+	/// <returns>Le temps écoulé en secondes</returns>
 	static int get_Secondes_Ecoulees(chrono::time_point<chrono::system_clock> chrono_start);
 
 	/// <summary>
@@ -24,7 +24,7 @@ public:
 	/// </summary>
 	/// 
 	/// <param name="uneSolution"></param>
-	/// <returns></returns>
+	/// <returns>Une copie de uneSolution</returns>
 	static Solution* Copie_Solution(Solution* uneSolution);
 
 	/// <summary>
@@ -40,7 +40,7 @@ public:
 	/// 
 	/// <param name="uneSolution"></param>
 	/// <param name="instance"></param>
-	/// <returns></returns>
+	/// <returns>La valeur de la fonction objective</returns>
 	static int Calcul_Valeur_FO(Solution* uneSolution, Instance* instance);
 
 	/// <summary>
@@ -51,7 +51,7 @@ public:
 	/// <param name="uneSolution"></param>
 	/// <param name="instance"></param>
 	/// <param name="coeff_Valeur_FO_Contrainte"></param>
-	/// <returns></returns>
+	/// <returns>La pénalisation de la valeur de la fonction objective</returns>
 	static int Calcul_Penalisation_Valeur_FO(Solution* uneSolution, Instance* instance, float coeff_Valeur_FO_Contrainte);
 
 	/// <summary>
@@ -61,7 +61,7 @@ public:
 	/// <param name="uneSolution"></param>
 	/// <param name="instance"></param>
 	/// <returns></returns>
-	static list<int> Personnes_Contraintes_Non_Respectes(Solution* uneSolution, Instance* instance);
+	static deque<int> Personnes_Contraintes_Non_Respectes(Solution* uneSolution, Instance* instance);
 
 	/// <summary>
 	/// Indique si la valeur (en opposition à sa clé) d'une paire a et plus petite que celle d'une paire b.

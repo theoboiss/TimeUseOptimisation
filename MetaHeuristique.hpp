@@ -22,8 +22,8 @@ public:
 	/// <param name="instance"></param>
 	/// <param name="coeff_Valeur_FO_Contrainte"></param>
 	/// <param name="chrono_start"></param>
-	/// <returns></returns>
-	static Solution* Descente_Voisinage_Variable(Solution solutionRealisable, Instance* instance, float coeff_Valeur_FO_Contrainte, chrono::time_point<chrono::system_clock> chrono_start);
+	/// <returns>Une meilleure solution que celle initiale ou rien</returns>
+	static Solution* Descente_Voisinage_Variable(Solution solutionInitiale, Instance* instance, float coeff_Valeur_FO_Contrainte, chrono::time_point<chrono::system_clock> chrono_start);
 
 
 	/// <summary>
@@ -35,7 +35,7 @@ public:
 	/// <param name="k"></param>
 	/// <param name="coeff_Valeur_FO_Contrainte"></param>
 	/// <param name="chrono_start"></param>
-	/// <returns></returns>
+	/// <returns>Une meilleure solution que celle du voisinage précédent ou rien</returns>
 	static Solution* Recherche_Meilleure_Solution_Voisinage(Solution solutionRealisable, Instance* instance, int k, float coeff_Valeur_FO_Contrainte, chrono::time_point<chrono::system_clock> chrono_start);
 
 
