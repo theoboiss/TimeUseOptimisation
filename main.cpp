@@ -91,7 +91,7 @@ int Resolution(Instance* instance)
 {
     int i_val_Retour_Fct_obj = 0;
     Solution* solutionInitiale = new Solution();
-    float coeff_Valeur_FO_Contrainte = 0.85;
+    float coeff_Valeur_FO_Contrainte = 0.1;
 
     solutionInitiale = Heuristique::GenerationSolutionRealisable(instance);
     Heuristique::InitValeurFonctionObjectif(solutionInitiale, instance, coeff_Valeur_FO_Contrainte);

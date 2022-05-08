@@ -1,13 +1,15 @@
 #include "Outils.hpp"
 
 
-int Outils::CodageLineaire(int a, int x, int b, int modulo)
+int Outils::CodageLineaire(double a, int x, int b, int modulo)
 {
-    while (x < 0) // TODO : A TESTER
+    if (x < 0)
     {
-        x += -x *modulo;
+        int reste_modulo_dist_a_zero = - x % modulo;
+        x += reste_modulo_dist_a_zero * modulo;
     }
-    return (a * x + b) % modulo;
+    int y = a * x + b;
+    return y % modulo;
 }
 
 
@@ -74,7 +76,7 @@ int Outils::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Insta
     //Vérification de la taille de v_v_IdShift_Par_Personne_et_Jour
     if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() != instance->get_Nombre_Personne())
     {
-        nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
+        nombre_contraintes_non_respectees++;
     }
     for (i = 0; i < uneSolution->v_v_IdShift_Par_Personne_et_Jour.size(); i++)
     {
@@ -84,14 +86,14 @@ int Outils::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Insta
         i_nb_WE = 0;
         if (uneSolution->v_v_IdShift_Par_Personne_et_Jour[i].size() != instance->get_Nombre_Jour())
         {
-            nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
+            nombre_contraintes_non_respectees++;
         }
         //Vérification que uneSolution->v_v_IdShift_Par_Personne_et_Jour contient que des Ids Shifts valident ou -1
         for (j = 0; j < uneSolution->v_v_IdShift_Par_Personne_et_Jour[i].size(); j++)
         {
             if ((uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j] != -1) && ((uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j] < 0) || (uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j] > instance->get_Nombre_Shift())))
             {
-                nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
+                nombre_contraintes_non_respectees++;
             }
             else
             {
@@ -108,14 +110,14 @@ int Outils::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Insta
                     //Vérification du nombre de shifts consécutifs maximum assignable à chaque personne
                     if (i_shift_consecutif > instance->get_Personne_Nbre_Shift_Consecutif_Max(i))
                     {
-                        nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
+                        nombre_contraintes_non_respectees++;
                     }
 
                     //Vérification des jours de congés de chaque personne
                     if (!instance->is_Available_Personne_Jour(i, j))
                     {
                         {
-                            nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
+                            nombre_contraintes_non_respectees++;
                         }
                     }
                 }
@@ -124,7 +126,7 @@ int Outils::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Insta
                     //Vérification du nombre de shifts consécutifs minimum assignable à chaque personne
                     if ((i_shift_consecutif < instance->get_Personne_Nbre_Shift_Consecutif_Min(i)) && (i_shift_consecutif != 0) && ((j - instance->get_Personne_Nbre_Shift_Consecutif_Min(i)) > 0))
                     {
-                        nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
+                        nombre_contraintes_non_respectees++;
                     }
                     i_shift_consecutif = 0;
                     b_test_si_premier_jour_off = false;
@@ -144,7 +146,7 @@ int Outils::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Insta
                         }
                         if (b_test_si_premier_jour_off)
                         {
-                            nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
+                            nombre_contraintes_non_respectees++;
                         }
                     }
                 }
@@ -155,7 +157,7 @@ int Outils::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Insta
                     {
                         if (!instance->is_possible_Shift_Succede(uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j], uneSolution->v_v_IdShift_Par_Personne_et_Jour[i][j + 1]))
                         {
-                            nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
+                            nombre_contraintes_non_respectees++;
                         }
                     }
                 }
@@ -164,7 +166,7 @@ int Outils::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Insta
         //Vérification de la durée totale maximale et minimale de chaque personne
         if ((i_duree_travail > instance->get_Personne_Duree_total_Max(i)) || (i_duree_travail < instance->get_Personne_Duree_total_Min(i)))
         {
-            nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
+            nombre_contraintes_non_respectees++;
             int valeur = instance->get_Personne_Duree_total_Min(i) - i_duree_travail;
             if (valeur > 0)
             {
@@ -174,23 +176,28 @@ int Outils::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Insta
         //Vérification du nombre de WE (samedi ou/et dimanche) de travail maximal pour chaque personne
         if (i_nb_WE > instance->get_Personne_Nbre_WE_Max(i))
         {
-            nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
+            nombre_contraintes_non_respectees++;
         }
         //Vérification du nombre maximal de shifts de chaque personne
         for (j = 0; j < instance->get_Nombre_Shift(); j++)
         {
             if (v_i_Nb_shift[j] > instance->get_Personne_Shift_Nbre_Max(i, j))
             {
-                nombre_contraintes_non_respectees = nombre_contraintes_non_respectees + 1;
+                nombre_contraintes_non_respectees++;
             }
         }
     }
 
     //int poids = uneSolution->i_valeur_fonction_objectif * coeff_Valeur_FO_Contrainte;
     //int poids = log10(10+uneSolution->i_valeur_fonction_objectif * coeff_Valeur_FO_Contrainte);
+
     int A = uneSolution->i_valeur_fonction_objectif + (nombre_contraintes_non_respectees * coeff_Valeur_FO_Contrainte);
     int B = nombre_contraintes_non_respectees * poids;
-    return A + B;
+    //int C = A + B;
+
+    int petiteValFO = uneSolution->i_valeur_fonction_objectif * coeff_Valeur_FO_Contrainte;
+    int C = nombre_contraintes_non_respectees * (petiteValFO + poids);
+    return C;
 }
 
 

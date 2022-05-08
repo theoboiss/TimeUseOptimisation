@@ -14,9 +14,7 @@ class Outils
 {
 public:
 
-	static int CodageLineaire(int a, int x, int b, int modulo);
-
-	static int DecodageLineaire(int a, int y, int b, int modulo);
+	static int CodageLineaire(double a, int x, int b, int modulo);
 
 	static bool Comparer(pair<int, int>& a, pair<int, int>& b);
 

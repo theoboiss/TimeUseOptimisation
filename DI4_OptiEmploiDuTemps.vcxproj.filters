@@ -22,6 +22,8 @@
   <ItemGroup>
     <Text Include="algorithme_heuristique.txt" />
     <Text Include="Data\Format Etudiant Public\data.txt" />
+    <Text Include="Data\Format Etudiant Public\ALLdata.txt" />
+    <Text Include="Data\Format Etudiant Public\sortie.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Instance.cpp">
