@@ -1,8 +1,8 @@
 #include "MetaHeuristique.hpp"
 
 #define DEBUG false
-#define DUREE_MAX 175.0
-#define kMAX 4.0
+#define DUREE_MAX 179.0
+#define kMAX 5
 #define DUREE_VOISINAGE_MAX DUREE_MAX/kMAX
 
 // ################### ALGORITHMES GENERAUX ###################
@@ -55,10 +55,11 @@ Solution* MetaHeuristique::Recherche_Meilleure_Solution_Voisinage(Solution solut
     Solution* p_candidat = &solutionRealisable;
     Solution solutionVoisine = *p_candidat;
 
-    int nombre_personne, nombre_jour, nombre_shift, nbIterMax, it;
+    int nombre_personne, nombre_jour, nombre_shift, min_nombre_personne_jour, it;
     nombre_personne = instance->get_Nombre_Personne();
     nombre_jour = instance->get_Nombre_Jour();
     nombre_shift = instance->get_Nombre_Shift();
+    min_nombre_personne_jour = min(nombre_personne, nombre_jour);
     //it = max(1, nombre_personne / 10);
     it = 1;
 
@@ -132,7 +133,7 @@ Solution* MetaHeuristique::Recherche_Meilleure_Solution_Voisinage(Solution solut
         */
         if (personnes_problematiques.size())
         {
-            for (int b = 1; b < nombre_jour; b += it)
+            for (int deplacement = 1; deplacement < nombre_jour; deplacement += it)
             {
                 for (int ite_personne = 0; ite_personne < personnes_problematiques.size(); ite_personne++)
                 {
@@ -150,13 +151,13 @@ Solution* MetaHeuristique::Recherche_Meilleure_Solution_Voisinage(Solution solut
                         {
                             Operation_Operateur_Swap(&solutionRealisable, &p_candidat, &solutionVoisine, instance, coeff_Valeur_FO_Contrainte,
                                 personne, jour,
-                                Operateur_Swap_Jour, nombre_jour, b);
+                                Operateur_Swap_Jour, nombre_personne, nombre_jour, deplacement);
                         }
                     }
                 }
             }
         }
-        for (int b = 1; b < nombre_jour; b += it)
+        for (int deplacement = 1; deplacement < nombre_jour; deplacement += it)
         {
             for (int personne = 0; personne < nombre_personne; personne++)
             {
@@ -172,7 +173,7 @@ Solution* MetaHeuristique::Recherche_Meilleure_Solution_Voisinage(Solution solut
                     {
                         Operation_Operateur_Swap(&solutionRealisable, &p_candidat, &solutionVoisine, instance, coeff_Valeur_FO_Contrainte,
                             personne, jour,
-                            Operateur_Swap_Jour, nombre_jour, b);
+                            Operateur_Swap_Jour, nombre_personne, nombre_jour, deplacement);
                     }
                 }
             }
@@ -186,7 +187,7 @@ Solution* MetaHeuristique::Recherche_Meilleure_Solution_Voisinage(Solution solut
         */
         if (personnes_problematiques.size())
         {
-            for (int b = 1; b < nombre_personne; b += it)
+            for (int deplacement = 1; deplacement < nombre_personne; deplacement += it)
             {
                 for (int ite_personne = 0; ite_personne < personnes_problematiques.size(); ite_personne++)
                 {
@@ -202,12 +203,12 @@ Solution* MetaHeuristique::Recherche_Meilleure_Solution_Voisinage(Solution solut
 
                         Operation_Operateur_Swap(&solutionRealisable, &p_candidat, &solutionVoisine, instance, coeff_Valeur_FO_Contrainte,
                             personne, jour,
-                            Operateur_Swap_Personne, nombre_personne, b);
+                            Operateur_Swap_Personne, nombre_personne, nombre_jour, deplacement);
                     }
                 }
             }
         }
-        for (int b = 1; b < nombre_personne; b += it)
+        for (int deplacement = 1; deplacement < nombre_personne; deplacement += it)
         {
             for (int personne = 0; personne < nombre_personne; personne++)
             {
@@ -221,13 +222,61 @@ Solution* MetaHeuristique::Recherche_Meilleure_Solution_Voisinage(Solution solut
 
                     Operation_Operateur_Swap(&solutionRealisable, &p_candidat, &solutionVoisine, instance, coeff_Valeur_FO_Contrainte,
                         personne, jour,
-                        Operateur_Swap_Personne, nombre_personne, b);
+                        Operateur_Swap_Personne, nombre_personne, nombre_jour, deplacement);
                 }
             }
         }
         break;
 
     case 4:
+        /*
+        * Opérateur de swap des personnes et des jours
+        * Domaine de définition de deplacement : {0..min(nombre_personne,nombre_jour)}
+        */
+        if (personnes_problematiques.size())
+        {
+            for (int deplacement = 1; deplacement < min_nombre_personne_jour; deplacement += it)
+            {
+                for (int ite_personne = 0; ite_personne < personnes_problematiques.size(); ite_personne++)
+                {
+                    int personne = personnes_problematiques.front();
+                    personnes_problematiques.pop_front();
+                    for (int jour = 0; jour < nombre_jour; jour++)
+                    {
+                        if (Outils::get_Secondes_Ecoulees(chrono_start) >= DUREE_MAX
+                            || Outils::get_Secondes_Ecoulees(chrono_voisinage_start) >= DUREE_VOISINAGE_MAX)
+                        {
+                            return (p_candidat == &solutionRealisable) ? nullptr : p_candidat;
+                        }
+
+                        Operation_Operateur_Swap(&solutionRealisable, &p_candidat, &solutionVoisine, instance, coeff_Valeur_FO_Contrainte,
+                            personne, jour,
+                            Operateur_Swap_Personne_Jour, nombre_personne, nombre_jour, deplacement);
+                    }
+                }
+            }
+        }
+        for (int deplacement = 1; deplacement < min_nombre_personne_jour; deplacement += it)
+        {
+            for (int personne = 0; personne < nombre_personne; personne++)
+            {
+                for (int jour = 0; jour < nombre_jour; jour++)
+                {
+                    if (Outils::get_Secondes_Ecoulees(chrono_start) >= DUREE_MAX
+                        || Outils::get_Secondes_Ecoulees(chrono_voisinage_start) >= DUREE_VOISINAGE_MAX)
+                    {
+                        return (p_candidat == &solutionRealisable) ? nullptr : p_candidat;
+                    }
+
+                    Operation_Operateur_Swap(&solutionRealisable, &p_candidat, &solutionVoisine, instance, coeff_Valeur_FO_Contrainte,
+                        personne, jour,
+                        Operateur_Swap_Personne_Jour, nombre_personne, nombre_jour, deplacement);
+                }
+            }
+        }
+        break;
+
+    case 5:
         /*
         * Opérateur de modification des shifts aléatoire comprenant les jours de repos
         */
@@ -352,13 +401,13 @@ void MetaHeuristique::Operateur_Modification_Shift_Aleatoire(Solution* uneSoluti
 
 void MetaHeuristique::Operation_Operateur_Swap(Solution* solutionRealisable, Solution** p_candidat, Solution* solutionVoisine, Instance* instance, float coeff_Valeur_FO_Contrainte,
     int personne, int jour,
-    void OperateurSwap(Solution*, int, int, int, int), int modulo, int deplacement)
+    void OperateurSwap(Solution*, int, int, int, int, int), int moduloX, int moduloY, int deplacement)
 {
     if (DEBUG) if ((personne + jour) % ((solutionVoisine->v_v_IdShift_Par_Personne_et_Jour.size() + solutionVoisine->v_v_IdShift_Par_Personne_et_Jour[0].size()) / 10) == 0
             && deplacement % (solutionVoisine->v_v_IdShift_Par_Personne_et_Jour[0].size() / 5) == 0)
         cout << " . ";
 
-    OperateurSwap(solutionVoisine, modulo, personne, jour, deplacement);
+    OperateurSwap(solutionVoisine, moduloX, moduloY, personne, jour, deplacement);
     Heuristique::Init_Valeur_FO_Indicative(solutionVoisine, instance, coeff_Valeur_FO_Contrainte);
 
     if (solutionVoisine->i_valeur_fonction_objectif >= 0 && solutionVoisine->i_valeur_fonction_objectif < (*p_candidat)->i_valeur_fonction_objectif)
@@ -376,12 +425,12 @@ void MetaHeuristique::Operation_Operateur_Swap(Solution* solutionRealisable, Sol
             cout << "Valeur de la fonction objectif indicative (avec pénalités) : " << solutionVoisine->i_valeur_fonction_objectif << endl << endl;
         }
     }
-    OperateurSwap(solutionVoisine, modulo, personne, jour, deplacement);
+    OperateurSwap(solutionVoisine, moduloX, moduloY, personne, jour, deplacement);
 }
 
 // Opérateurs
 
-void MetaHeuristique::Operateur_Swap_Jour(Solution* uneSolution, int nombre_jour, int personne, int jour, int deplacement)
+void MetaHeuristique::Operateur_Swap_Jour(Solution* uneSolution, int nombre_personne, int nombre_jour, int personne, int jour, int deplacement)
 {
     // Initialisation
     int* p_to_swap_shift_personne_jour = &uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
@@ -393,11 +442,23 @@ void MetaHeuristique::Operateur_Swap_Jour(Solution* uneSolution, int nombre_jour
     *p_shift_personne_jour = temp;
 }
 
-void MetaHeuristique::Operateur_Swap_Personne(Solution* uneSolution, int nombre_personne, int personne, int jour, int deplacement)
+void MetaHeuristique::Operateur_Swap_Personne(Solution* uneSolution, int nombre_personne, int nombre_jour, int personne, int jour, int deplacement)
 {
     // Initialisation
     int* p_to_swap_shift_personne_jour = &uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
     int* p_shift_personne_jour = &uneSolution->v_v_IdShift_Par_Personne_et_Jour[(personne + deplacement) % nombre_personne][jour];
+    int temp = *p_to_swap_shift_personne_jour;
+
+    // Swap
+    *p_to_swap_shift_personne_jour = *p_shift_personne_jour;
+    *p_shift_personne_jour = temp;
+}
+
+void MetaHeuristique::Operateur_Swap_Personne_Jour(Solution* uneSolution, int nombre_personne, int nombre_jour, int personne, int jour, int deplacement)
+{
+    // Initialisation
+    int* p_to_swap_shift_personne_jour = &uneSolution->v_v_IdShift_Par_Personne_et_Jour[personne][jour];
+    int* p_shift_personne_jour = &uneSolution->v_v_IdShift_Par_Personne_et_Jour[(personne + deplacement) % nombre_personne][(jour + deplacement) % nombre_jour];
     int temp = *p_to_swap_shift_personne_jour;
 
     // Swap

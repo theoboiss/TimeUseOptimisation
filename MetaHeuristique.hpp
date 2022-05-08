@@ -77,7 +77,7 @@ public:
 	/// <param name="deplacement"></param>
 	static void Operation_Operateur_Swap(Solution* solutionRealisable, Solution** candidat, Solution* solutionVoisine, Instance* instance, float coeff_Valeur_FO_Contrainte,
 		int personne, int jour,
-		void OperateurSwap(Solution*, int, int, int, int), int modulo, int deplacement);
+		void OperateurSwap(Solution*, int, int, int, int, int), int moduloX, int moduloY, int deplacement);
 
 
 // ################### Opérateurs qui crée un nouveau voisin d'une solution ###################
@@ -114,7 +114,7 @@ public:
 	/// <param name="personne"></param>
 	/// <param name="jour"></param>
 	/// <param name="b"></param>
-	static void Operateur_Swap_Jour(Solution* uneSolution, int nombre_jour, int personne, int jour, int deplacement);
+	static void Operateur_Swap_Jour(Solution* uneSolution, int nombre_personne, int nombre_jour, int personne, int jour, int deplacement);
 
 
 	/// <summary>
@@ -126,6 +126,18 @@ public:
 	/// <param name="personne"></param>
 	/// <param name="jour"></param>
 	/// <param name="deplacement"></param>
-	static void Operateur_Swap_Personne(Solution* uneSolution, int nombre_personne, int personne, int jour, int deplacement);
+	static void Operateur_Swap_Personne(Solution* uneSolution, int nombre_personne, int nombre_jour, int personne, int jour, int deplacement);
+
+	/// <summary>
+	/// Echange les shifts entre deux personnes et deux jours.
+	/// </summary>
+	/// 
+	/// <param name="uneSolution"></param>
+	/// <param name="nombre_personne"></param>
+	/// <param name="nombre_jour"></param>
+	/// <param name="personne"></param>
+	/// <param name="jour"></param>
+	/// <param name="deplacement"></param>
+	static void Operateur_Swap_Personne_Jour(Solution* uneSolution, int nombre_personne, int nombre_jour, int personne, int jour, int deplacement);
 
 };
