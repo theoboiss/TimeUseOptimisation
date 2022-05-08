@@ -1,21 +1,23 @@
 #include "Heuristique.hpp"
 
-// ################### CALCUL VALEUR FONCTION OBJECTIVE ###################
+#define DEBUG false
+
+// ################### CALCUL DE LA VALEUR DE LA FONCTION OBJECTIVE ###################
 
 
-void Heuristique::InitValeurFonctionObjectif(Solution* uneSolution, Instance* instance, float coeff_Valeur_FO_Contrainte)
+void Heuristique::Init_Valeur_FO_Indicative(Solution* uneSolution, Instance* instance, float coeff_Valeur_FO_Contrainte)
 {
     if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() == 0 || uneSolution->v_v_IdShift_Par_Personne_et_Jour[0].size() == 0) return;
 
-    uneSolution->i_valeur_fonction_objectif = Outils::i_Calcul_Valeur_Fonction_Objectif(uneSolution, instance);
+    uneSolution->i_valeur_fonction_objectif = Outils::Calcul_Valeur_FO(uneSolution, instance);
 
-    uneSolution->i_valeur_fonction_objectif = uneSolution->i_valeur_fonction_objectif + Outils::i_Calcul_Penalisation_Fonction_Objectif(uneSolution, instance, coeff_Valeur_FO_Contrainte);
+    uneSolution->i_valeur_fonction_objectif += Outils::Calcul_Penalisation_Valeur_FO(uneSolution, instance, coeff_Valeur_FO_Contrainte);
     //uneSolution->i_valeur_fonction_objectif = log10(uneSolution->i_valeur_fonction_objectif) + Heuristique::i_Calcul_Penalisation_Fonction_Objectif(uneSolution, instance, coeff_Valeur_FO_Contrainte);
 }
 
 
 
-// ################### CREATION 1ERE SOLUTION "REALISABLE" ###################
+// ################### CREATION DE LA SOLUTION INITIALE ###################
 
 
 bool Heuristique::is_Jour_OFF_Proche_WE(Instance* instance, int jour_OFF, int i_Nbre_Jour_OFF_Consecutif_Min, int i_Nbre_Shift_Consecutif_Min)
@@ -31,7 +33,7 @@ bool Heuristique::is_Jour_OFF_Proche_WE(Instance* instance, int jour_OFF, int i_
 }
 
 
-Solution* Heuristique::GenerationSolutionRealisable(Instance* instance) {
+Solution* Heuristique::Generation_Solution_Initiale(Instance* instance) {
     // Initialisation
 
     Solution* S = new Solution();
@@ -148,10 +150,10 @@ Solution* Heuristique::GenerationSolutionRealisable(Instance* instance) {
 
     for (int personne = 0; personne < instance->get_Nombre_Personne(); personne++)
     {
-        //cout << "personne " << personne << " ";
+        if (DEBUG) cout << "personne " << personne << " ";
         for (int jour = 1; jour < instance->get_Nombre_Jour(); jour++) //On parcourt les jours à partir du deuxième
         {
-            //cout << "jour " << jour << " ";
+            if (DEBUG) cout << "jour " << jour << " ";
             int semaine = jour / 7;
             int shift = -1; //Initialisation du shift pour une personne et pour un jour
 
@@ -232,10 +234,14 @@ Solution* Heuristique::GenerationSolutionRealisable(Instance* instance) {
                 v_l_Jour_OFF_Proche_WE.at(personne).pop_front();
             }
         }
-        //cout << endl;
+        if (DEBUG) cout << endl;
     }
     return S;
 }
+
+
+
+// ################### INDICATEURS POUR PRENDRE DES DECISIONS LORS DE L'INITIALISATION ###################
 
 
 bool Heuristique::is_Peut_Travailler_WE_Semaine(list<int>& l_Jour_OFF_Proche_WE_Personne, int nbre_WE_Travaille_Personne, int nbre_WE_Max_Personne, int semaine)

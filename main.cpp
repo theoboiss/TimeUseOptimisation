@@ -19,8 +19,6 @@ using namespace std;
 
 int Resolution(Instance* instance);
 
-void printSolution(Solution* uneSolution);
-
 
 int main(int argc, const char* argv[])
 {
@@ -89,30 +87,34 @@ int main(int argc, const char* argv[])
 
 int Resolution(Instance* instance)
 {
-    chrono::time_point<chrono::system_clock> chrono_start = chrono::system_clock::now();
-
+    // Initialisation
     int i_val_Retour_Fct_obj = 0;
+    chrono::time_point<chrono::system_clock> chrono_start = chrono::system_clock::now();
     Solution* solutionInitiale = new Solution();
+
+    // Calcul de la solution initiale avec l'heuristique
     float coeff_Valeur_FO_Contrainte = 0.25;
+    solutionInitiale = Heuristique::Generation_Solution_Initiale(instance);
+    Heuristique::Init_Valeur_FO_Indicative(solutionInitiale, instance, coeff_Valeur_FO_Contrainte);
 
-    solutionInitiale = Heuristique::GenerationSolutionRealisable(instance);
-    Heuristique::InitValeurFonctionObjectif(solutionInitiale, instance, coeff_Valeur_FO_Contrainte);
-
-    //printSolution(solutionInitiale);
+    // Conlusions sur la solution initiale
     i_val_Retour_Fct_obj = solutionInitiale->i_valeur_fonction_objectif;
+    cout << endl << "Solution initiale trouvée !" << endl;
     solutionInitiale->Verification_Solution(instance);
-    cout << "Valeur de la fonction objective sans pénalités : " << Outils::i_Calcul_Valeur_Fonction_Objectif(solutionInitiale, instance) << endl;
-    cout << "Valeur de la fonction objectif : " << solutionInitiale->i_valeur_fonction_objectif << endl << endl;
+    cout << "Valeur de la fonction objective sans pénalités : " << Outils::Calcul_Valeur_FO(solutionInitiale, instance) << endl;
+    cout << "Valeur de la fonction objectif indicative (avec pénalités) : " << solutionInitiale->i_valeur_fonction_objectif << endl << endl;
 
+    // Calcul d'une meilleure solution avec la méta-heuristique
+    Solution* meilleureSolutionTrouvee = MetaHeuristique::Descente_Voisinage_Variable(*solutionInitiale, instance, coeff_Valeur_FO_Contrainte, chrono_start);
 
-    Solution* meilleureSolutionTrouvee = MetaHeuristique::MeilleureSolution(*solutionInitiale, instance, coeff_Valeur_FO_Contrainte, chrono_start); // Valeur de la FO initialisé dedans
+    // Conclusions sur la meilleure solution trouvée
     if (meilleureSolutionTrouvee)
     {
-        //printSolution(meilleureSolutionTrouvee);
         i_val_Retour_Fct_obj = meilleureSolutionTrouvee->i_valeur_fonction_objectif;
+        cout << "Meilleure solution trouvée !" << endl;
         meilleureSolutionTrouvee->Verification_Solution(instance);
-        cout << "Valeur de la fonction objective sans pénalités : " << Outils::i_Calcul_Valeur_Fonction_Objectif(meilleureSolutionTrouvee, instance) << endl;
-        cout << "Valeur de la fonction objectif : " << meilleureSolutionTrouvee->i_valeur_fonction_objectif << endl << endl;
+        cout << "Valeur de la fonction objective sans pénalités : " << Outils::Calcul_Valeur_FO(meilleureSolutionTrouvee, instance) << endl;
+        cout << "Valeur de la fonction objectif indicative (avec pénalités) : " << meilleureSolutionTrouvee->i_valeur_fonction_objectif << endl << endl;
         delete meilleureSolutionTrouvee;
     }
     else

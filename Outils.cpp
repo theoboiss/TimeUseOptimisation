@@ -1,7 +1,7 @@
 #include "Outils.hpp"
 
 
-int Outils::CodageLineaire(double a, int x, int b, int modulo)
+int Outils::Codage_Lineaire(double a, int x, int b, int modulo)
 {
     if (x < 0)
     {
@@ -19,7 +19,7 @@ bool Outils::Comparer(pair<int, int>& a, pair<int, int>& b)
 }
 
 
-int Outils::i_Calcul_Valeur_Fonction_Objectif(Solution* uneSolution, Instance* instance)
+int Outils::Calcul_Valeur_FO(Solution* uneSolution, Instance* instance)
 {
     int i_fc_obj = 0;
     vector<vector<int>> v_i_nb_personne_par_Shift_et_jour(instance->get_Nombre_Shift(), vector<int>(instance->get_Nombre_Jour(), 0));
@@ -64,7 +64,7 @@ int Outils::i_Calcul_Valeur_Fonction_Objectif(Solution* uneSolution, Instance* i
 }
 
 
-int Outils::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Instance* instance, float coeff_Valeur_FO_Contrainte)
+int Outils::Calcul_Penalisation_Valeur_FO(Solution* uneSolution, Instance* instance, float coeff_Valeur_FO_Contrainte)
 {
     int poids = 0;
     int nombre_contraintes_non_respectees = 0;
@@ -202,7 +202,7 @@ int Outils::i_Calcul_Penalisation_Fonction_Objectif(Solution* uneSolution, Insta
 }
 
 
-list<int> Outils::Personne_Contraintes_Non_Respectes(Solution* uneSolution, Instance* instance)
+list<int> Outils::Personnes_Contraintes_Non_Respectes(Solution* uneSolution, Instance* instance)
 {
     list<int> personnes_problematiques;
 
@@ -227,7 +227,7 @@ list<int> Outils::Personne_Contraintes_Non_Respectes(Solution* uneSolution, Inst
 }
 
 
-Solution* Outils::CopieSolution(Solution* uneSolution)
+Solution* Outils::Copie_Solution(Solution* uneSolution)
 {
     if (uneSolution->v_v_IdShift_Par_Personne_et_Jour.size() == 0) return nullptr;
 
@@ -250,7 +250,7 @@ Solution* Outils::CopieSolution(Solution* uneSolution)
 }
 
 
-void Outils::printSolution(Solution* uneSolution)
+void Outils::print_Solution(Solution* uneSolution)
 {
     for (int personne = 0; personne < uneSolution->v_v_IdShift_Par_Personne_et_Jour.size(); personne++)
     {
@@ -263,7 +263,7 @@ void Outils::printSolution(Solution* uneSolution)
 }
 
 
-int Outils::getSecondesEcoulees(chrono::time_point<chrono::system_clock> chrono_start)
+int Outils::get_Secondes_Ecoulees(chrono::time_point<chrono::system_clock> chrono_start)
 {
     chrono::duration<double> elapsed = chrono::system_clock::now() - chrono_start;
     return elapsed.count();
